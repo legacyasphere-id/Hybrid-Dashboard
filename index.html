@@ -1,0 +1,1363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="theme-color" content="#111111" />
+<title>LegacyaSphere · Studio Ops</title>
+
+<!-- NOTE: CDN Tailwind is development-only. Replace with Tailwind CLI build for production. -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<script src="https://unpkg.com/lucide@latest"></script>
+
+<style>
+  /* ─────────────────────────────────────────────────────────────
+     DESIGN TOKENS — single source of truth for all colors.
+     DO NOT move to Tailwind config or hardcode in JS.
+  ───────────────────────────────────────────────────────────── */
+  :root {
+    --accent: #4f46e5;
+    --accent-hover: #4338ca;
+    --accent-light: #eef2ff;
+    --accent-muted: rgba(79, 70, 229, 0.12);
+
+    --success: #10b981;
+    --success-light: #ecfdf5;
+    --warning: #f59e0b;
+    --warning-light: #fffbeb;
+    --danger: #f43f5e;
+    --danger-light: #fff1f2;
+    --revision: #f97316;
+    --revision-light: #fff7ed;
+    --violet: #8b5cf6;
+    --violet-light: #f5f3ff;
+
+    --neutral-900: #171717;
+    --neutral-800: #262626;
+    --neutral-700: #404040;
+    --neutral-600: #525252;
+    --neutral-500: #737373;
+    --neutral-400: #a3a3a3;
+    --neutral-300: #d4d4d4;
+    --neutral-200: #e5e5e5;
+    --neutral-100: #f5f5f5;
+    --neutral-50:  #fafafa;
+    --white:       #ffffff;
+
+    --sidebar-bg: #111111;
+    --sidebar-border: rgba(255,255,255,0.06);
+    --sidebar-hover: rgba(255,255,255,0.05);
+    --sidebar-active: rgba(255,255,255,0.10);
+    --sidebar-text: #a3a3a3;
+    --sidebar-text-active: #ffffff;
+
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 14px;
+    --radius-xl: 18px;
+
+    --shadow-card:  0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-hover: 0 4px 12px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.06);
+    --shadow-modal: 0 20px 60px rgba(0,0,0,0.18), 0 4px 16px rgba(0,0,0,0.10);
+  }
+
+  html, body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    background: var(--neutral-50);
+    color: var(--neutral-900);
+  }
+  .tabular { font-variant-numeric: tabular-nums; }
+
+  /* Activity timeline line — CSS pseudo-element only, no <div> inside <ol> */
+  ol.activity-list { position: relative; }
+  ol.activity-list::before {
+    content: '';
+    position: absolute;
+    left: 6px;
+    top: 8px;
+    bottom: 8px;
+    width: 1px;
+    background: var(--neutral-200);
+  }
+
+  /* Metric card hover-reveal for "View →" link */
+  .metric-card .view-link {
+    opacity: 0;
+    transform: translateX(-4px);
+    transition: opacity .2s ease, transform .2s ease;
+  }
+  .metric-card:hover .view-link {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  /* Modal & popover entry animations */
+  .modal-enter { animation: modalIn .18s ease-out; }
+  @keyframes modalIn {
+    from { opacity: 0; transform: translateY(8px) scale(.98); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .popover-enter { animation: popoverIn .22s ease-out; }
+  @keyframes popoverIn {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Focus ring fallback */
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+  }
+
+  /* Task completed state */
+  .task-done .task-text { text-decoration: line-through; color: var(--neutral-400); }
+  .task-done .priority-dot { opacity: .35; }
+
+  /* ─────────────────────────────────────────────────────────────
+     HOVER UTILITY CLASSES
+     Replaces ALL inline onmouseover / onmouseout attributes.
+     CSS vars are read at runtime — no hex values here.
+  ───────────────────────────────────────────────────────────── */
+
+  /* Sidebar: workspace switcher */
+  .workspace-switcher { background: transparent; transition: background 0.15s ease; }
+  .workspace-switcher:hover { background: var(--sidebar-hover); }
+
+  /* Sidebar: search trigger */
+  .sidebar-search-btn { transition: background 0.15s ease; }
+  .sidebar-search-btn:hover { background: var(--sidebar-hover) !important; }
+
+  /* Sidebar: inactive nav item */
+  .nav-item { transition: background 0.15s ease, color 0.15s ease; }
+  .nav-item:hover { background: var(--sidebar-hover) !important; color: white !important; }
+
+  /* Sidebar: footer icon-link */
+  .sidebar-footer-link { transition: background 0.15s ease, color 0.15s ease; }
+  .sidebar-footer-link:hover { background: var(--sidebar-hover) !important; color: white !important; }
+
+  /* Sidebar: AI draft text button */
+  .ai-draft-btn { transition: color 0.15s ease; }
+  .ai-draft-btn:hover { color: white !important; }
+
+  /* Accent filled button (New Project, Create Project, Copy) */
+  .btn-accent { background: var(--accent); transition: background 0.15s ease; }
+  .btn-accent:hover { background: var(--accent-hover) !important; }
+
+  /* Ghost modal cancel button */
+  .btn-ghost-modal { background: transparent; transition: background 0.15s ease; }
+  .btn-ghost-modal:hover { background: var(--neutral-100) !important; }
+
+  /* Text-ghost: neutral-500 → neutral-900 on hover */
+  .btn-ghost-text { transition: color 0.15s ease; }
+  .btn-ghost-text:hover { color: var(--neutral-900) !important; }
+
+  /* AI option cards */
+  .ai-option-card { transition: background 0.15s ease, border-color 0.15s ease; }
+  .ai-option-card:hover { background: var(--neutral-50) !important; border-color: var(--neutral-300) !important; }
+
+  /* Metric card: shadow + border lift */
+  .metric-card { transition: box-shadow 0.15s ease, border-color 0.15s ease; }
+  .metric-card:hover { box-shadow: var(--shadow-hover) !important; border-color: var(--neutral-300) !important; }
+
+  /* Task list row */
+  .task-row { transition: background 0.15s ease; }
+  .task-row:hover { background: var(--neutral-50) !important; }
+
+  /* Project list row */
+  .project-row { transition: background 0.15s ease; }
+  .project-row:hover { background: var(--neutral-50) !important; }
+
+  /* Footer link */
+  .footer-link { transition: color 0.15s ease; }
+  .footer-link:hover { color: var(--neutral-600) !important; }
+</style>
+</head>
+
+<body>
+
+<div class="flex min-h-screen">
+
+  <!-- Mobile backdrop -->
+  <div id="backdrop" class="hidden fixed inset-0 bg-neutral-900/40 backdrop-blur-sm z-40 lg:hidden" aria-hidden="true"></div>
+
+  <!-- ===== SIDEBAR ===== -->
+  <aside id="sidebar"
+         class="fixed lg:static inset-y-0 left-0 z-50 w-[240px] flex flex-col -translate-x-full lg:translate-x-0 transition-transform duration-200"
+         style="background: var(--sidebar-bg); color: var(--sidebar-text); border-right: 1px solid var(--sidebar-border);">
+
+    <!-- Workspace switcher -->
+    <div class="px-4 pt-5 pb-4">
+      <button aria-label="Switch workspace"
+              class="workspace-switcher w-full flex items-center gap-2.5 px-2 py-2 rounded-[var(--radius-md)] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--sidebar-bg)]">
+        <div class="w-7 h-7 rounded-[var(--radius-sm)] flex items-center justify-center text-white text-[13px] font-semibold"
+             style="background: linear-gradient(135deg, var(--accent), var(--accent-hover));">L</div>
+        <div class="flex-1 text-left min-w-0">
+          <div class="text-[13px] font-semibold leading-tight truncate" style="color: var(--sidebar-text-active);">LegacyaSphere</div>
+          <div class="text-[11px] leading-tight" style="color: var(--neutral-500);">Studio · Pro</div>
+        </div>
+        <i data-lucide="chevron-down" style="width:14px;height:14px;color:var(--neutral-500);"></i>
+      </button>
+    </div>
+
+    <!-- Sidebar search -->
+    <div class="px-4 mb-4">
+      <button id="sidebar-search"
+              aria-label="Search"
+              class="sidebar-search-btn w-full flex items-center gap-2 px-2.5 py-1.5 rounded-[var(--radius-md)] transition text-[13px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--sidebar-bg)]"
+              style="background: rgba(255,255,255,0.04); color: var(--neutral-400);">
+        <i data-lucide="search" style="width:14px;height:14px"></i>
+        <span class="flex-1 text-left">Search</span>
+        <kbd class="text-[10px] font-mono px-1.5 py-0.5 rounded" style="background: rgba(255,255,255,0.06); color: var(--neutral-400);">⌘K</kbd>
+      </button>
+    </div>
+
+    <!-- Primary navigation (rendered from JS) -->
+    <nav role="navigation" aria-label="Primary navigation" class="flex-1 px-3 space-y-0.5" id="primary-nav"></nav>
+
+    <!-- Sidebar footer -->
+    <div class="px-3 pb-4 space-y-0.5">
+      <a href="#"
+         class="sidebar-footer-link flex items-center gap-3 px-3 py-2 rounded-[var(--radius-md)] text-[13px] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--sidebar-bg)]"
+         style="color: var(--neutral-400);">
+        <i data-lucide="settings" style="width:16px;height:16px"></i><span>Settings</span>
+      </a>
+
+      <div class="mt-3 p-3 rounded-[var(--radius-md)]"
+           style="background: linear-gradient(135deg, var(--neutral-800), rgba(38,38,38,0.5)); border: 1px solid var(--sidebar-border);">
+        <div class="flex items-center gap-1.5 text-[11px] font-medium mb-1" style="color: #a5b4fc;">
+          <i data-lucide="sparkles" style="width:11px;height:11px"></i> AI Assistant
+        </div>
+        <div class="text-[11px] leading-relaxed mb-2.5 font-light" style="color: var(--neutral-400);">
+          Draft proposals &amp; client emails in seconds.
+        </div>
+        <button id="open-ai"
+                class="ai-draft-btn text-[11px] font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--sidebar-bg)] rounded"
+                style="color: #c7d2fe;">
+          Draft with AI →
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ===== MAIN ===== -->
+  <div class="flex-1 flex flex-col min-w-0">
+
+    <!-- Topbar -->
+    <header class="h-14 px-4 lg:px-8 flex items-center justify-between bg-white" style="border-bottom: 1px solid var(--neutral-200);">
+      <div class="flex items-center gap-3">
+        <button id="menu-btn" aria-label="Open navigation"
+                class="lg:hidden p-1.5 -ml-1.5 rounded-[var(--radius-sm)] transition hover:bg-[var(--neutral-100)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2">
+          <i data-lucide="menu" style="width:18px;height:18px"></i>
+        </button>
+        <div class="hidden md:flex items-center gap-2 text-[13px]" style="color: var(--neutral-500);">
+          <span style="color: var(--neutral-400);">Workspace</span>
+          <i data-lucide="chevron-right" style="width:12px;height:12px"></i>
+          <span class="font-medium" style="color: var(--neutral-700);">Dashboard</span>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-1.5">
+        <button id="topbar-search" aria-label="Search"
+                class="hidden sm:flex items-center gap-2 px-3 py-1.5 text-[13px] rounded-[var(--radius-md)] transition hover:bg-[var(--neutral-100)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2"
+                style="color: var(--neutral-700);">
+          <i data-lucide="search" style="width:14px;height:14px"></i><span>Search</span>
+          <kbd class="text-[10px] font-mono px-1.5 py-0.5 rounded ml-1" style="background: var(--neutral-100); color: var(--neutral-500);">⌘K</kbd>
+        </button>
+        <button aria-label="Notifications"
+                class="relative p-2 rounded-[var(--radius-md)] transition hover:bg-[var(--neutral-100)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2">
+          <i data-lucide="bell" style="width:16px;height:16px;color:var(--neutral-600);"></i>
+          <span class="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full" style="background: var(--accent);"></span>
+        </button>
+        <button aria-label="Account menu"
+                class="ml-1 w-8 h-8 rounded-full text-white text-[12px] font-semibold flex items-center justify-center transition hover:ring-2 hover:ring-[var(--neutral-200)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2"
+                style="background: linear-gradient(135deg, var(--neutral-700), var(--neutral-900));">AS</button>
+      </div>
+    </header>
+
+    <!-- Main content -->
+    <main class="flex-1 px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
+      <div class="max-w-[1400px] mx-auto">
+
+        <!-- Page header -->
+        <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-8">
+          <div>
+            <h1 id="greeting" class="text-[22px] sm:text-[26px] font-semibold tracking-tight leading-tight" style="color: var(--neutral-900);">Good morning, Alex</h1>
+            <p id="date-line" class="text-[13px] mt-1" style="color: var(--neutral-500);">—</p>
+          </div>
+          <button id="open-new-project"
+                  class="btn-accent inline-flex items-center gap-1.5 px-3.5 py-2 rounded-[var(--radius-md)] text-white text-[13px] font-medium w-fit focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2"
+                  style="box-shadow: var(--shadow-card);">
+            <i data-lucide="plus" style="width:14px;height:14px"></i> New Project
+          </button>
+        </div>
+
+        <!-- Metric cards -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6" id="metric-grid"></div>
+
+        <!-- Chart + Tasks -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5 mb-6">
+
+          <!-- Revenue chart -->
+          <section class="lg:col-span-8 bg-white rounded-[var(--radius-lg)] p-5 sm:p-6"
+                   style="border: 1px solid var(--neutral-200); box-shadow: var(--shadow-card);">
+            <div class="flex items-start justify-between mb-1">
+              <div>
+                <h2 class="text-[15px] font-semibold" style="color: var(--neutral-900);">Revenue</h2>
+                <p class="text-[12px] mt-0.5 font-light" style="color: var(--neutral-500);">Last 30 days</p>
+              </div>
+              <div id="range-toggle" class="flex items-center gap-1 text-[12px]" role="tablist" aria-label="Time range">
+                <button data-range="7D"  class="px-2.5 py-1 rounded-[var(--radius-sm)] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]">7D</button>
+                <button data-range="30D" class="px-2.5 py-1 rounded-[var(--radius-sm)] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]">30D</button>
+                <button data-range="90D" class="px-2.5 py-1 rounded-[var(--radius-sm)] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]">90D</button>
+              </div>
+            </div>
+
+            <div class="flex flex-wrap items-baseline gap-x-4 gap-y-1 mb-5 mt-3">
+              <div>
+                <span id="projected-value" class="text-[24px] font-semibold tracking-tight tabular" style="color: var(--neutral-900);">$31,200</span>
+                <span class="text-[12px] ml-1.5 font-light" style="color: var(--neutral-500);">Projected month-end</span>
+              </div>
+              <div>
+                <span class="text-[12px] font-light" style="color: var(--neutral-500);">MTD actual</span>
+                <span class="text-[12px] font-medium ml-1 tabular" style="color: var(--neutral-700);">$24,580</span>
+              </div>
+            </div>
+
+            <!-- Chart wrap: aspect-ratio matches viewBox so SVG fits without letterboxing -->
+            <div class="relative w-full" id="chart-wrap" style="aspect-ratio: 600 / 200;">
+              <svg id="rev-chart" viewBox="0 0 600 200" width="100%" height="100%"
+                   class="block w-full h-full" aria-label="Revenue trend chart"></svg>
+              <div id="chart-tooltip"
+                   class="hidden absolute z-50 px-2.5 py-1.5 rounded-[var(--radius-sm)] text-[11px] text-white pointer-events-none tabular"
+                   style="background: var(--neutral-900); box-shadow: 0 4px 12px rgba(0,0,0,0.15);"></div>
+            </div>
+
+            <div id="chart-labels" class="flex justify-between text-[10px] tabular mt-2 font-light" style="color: var(--neutral-400); padding-left: 38px; padding-right: 8px;"></div>
+          </section>
+
+          <!-- Today's tasks -->
+          <section class="lg:col-span-4 bg-white rounded-[var(--radius-lg)] p-5 sm:p-6 flex flex-col"
+                   style="border: 1px solid var(--neutral-200); box-shadow: var(--shadow-card);">
+            <div class="flex items-start justify-between mb-3">
+              <div>
+                <h2 class="text-[15px] font-semibold" style="color: var(--neutral-900);">Today</h2>
+                <p class="text-[12px] mt-0.5 font-light" style="color: var(--neutral-500);"><span id="task-count">0</span> tasks</p>
+              </div>
+              <a href="#" class="btn-ghost-text text-[12px] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] rounded"
+                 style="color: var(--neutral-500);">View all</a>
+            </div>
+
+            <!-- Priority legend -->
+            <div class="flex items-center gap-3 mb-3 text-[11px] font-light" style="color: var(--neutral-400);">
+              <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full" style="background: var(--danger);"></span>Urgent</span>
+              <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full" style="background: var(--warning);"></span>High</span>
+              <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full" style="background: var(--neutral-300);"></span>Normal</span>
+            </div>
+
+            <ul id="task-list" class="space-y-1 flex-1"></ul>
+
+            <div class="mt-3" id="task-add-wrap"></div>
+          </section>
+
+        </div>
+
+        <!-- Projects + Activity -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5">
+
+          <section class="lg:col-span-8 bg-white rounded-[var(--radius-lg)]"
+                   style="border: 1px solid var(--neutral-200); box-shadow: var(--shadow-card);">
+            <div class="flex items-center justify-between px-5 sm:px-6 py-5">
+              <div>
+                <h2 class="text-[15px] font-semibold" style="color: var(--neutral-900);">Active Projects</h2>
+                <p class="text-[12px] mt-0.5 font-light" style="color: var(--neutral-500);"><span id="project-count">0</span> in flight</p>
+              </div>
+              <a href="#" class="btn-ghost-text text-[12px] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] rounded"
+                 style="color: var(--neutral-500);">View all</a>
+            </div>
+            <div id="project-list" style="border-top: 1px solid var(--neutral-100);"></div>
+          </section>
+
+          <section class="lg:col-span-4 bg-white rounded-[var(--radius-lg)] p-5 sm:p-6"
+                   style="border: 1px solid var(--neutral-200); box-shadow: var(--shadow-card);">
+            <div class="flex items-start justify-between mb-5">
+              <div>
+                <h2 class="text-[15px] font-semibold" style="color: var(--neutral-900);">Activity</h2>
+                <p class="text-[12px] mt-0.5 font-light" style="color: var(--neutral-500);">Recent updates</p>
+              </div>
+              <a href="#" class="btn-ghost-text text-[12px] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] rounded"
+                 style="color: var(--neutral-500);">View all</a>
+            </div>
+            <ol id="activity-list" class="activity-list space-y-4"></ol>
+          </section>
+
+        </div>
+
+        <footer class="px-4 sm:px-6 lg:px-8 py-5 text-center text-[11px] mt-8 font-light" style="color: var(--neutral-400);">
+          © 2025 Legacya Sphere Studio · v1.0.0 ·
+          <a href="#" class="footer-link transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] rounded"
+             style="color: var(--neutral-400);">Support</a>
+        </footer>
+
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- ===== SEARCH MODAL ===== -->
+<div id="search-modal" class="hidden fixed inset-0 z-[60] items-start justify-center pt-[15vh] px-4" role="dialog" aria-modal="true" aria-label="Search">
+  <div data-backdrop class="absolute inset-0 bg-neutral-900/30 backdrop-blur-sm"></div>
+  <div class="modal-enter relative bg-white rounded-[var(--radius-xl)] max-w-[560px] w-full overflow-hidden" style="box-shadow: var(--shadow-modal);">
+    <div class="flex items-center gap-2.5 px-4 py-3.5" style="border-bottom: 1px solid var(--neutral-100);">
+      <i data-lucide="search" style="width:16px;height:16px;color:var(--neutral-400)"></i>
+      <input id="search-input" type="text" placeholder="Search projects, clients, tasks..."
+             class="flex-1 bg-transparent outline-none text-[14px] placeholder:text-[var(--neutral-400)]" style="color: var(--neutral-900);" />
+      <button data-close aria-label="Close search" class="p-1 rounded transition hover:bg-[var(--neutral-100)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]">
+        <i data-lucide="x" style="width:14px;height:14px;color:var(--neutral-500)"></i>
+      </button>
+    </div>
+    <div class="p-3">
+      <div class="text-[11px] font-medium uppercase tracking-wider px-2 py-1.5" style="color: var(--neutral-400);">Quick Jump</div>
+      <ul class="space-y-0.5">
+        <li><a href="#" class="flex items-center gap-2.5 px-2.5 py-2 rounded-[var(--radius-sm)] text-[13px] transition hover:bg-[var(--neutral-50)]" style="color: var(--neutral-700);"><i data-lucide="layout-dashboard" style="width:14px;height:14px;color:var(--neutral-400)"></i>Dashboard</a></li>
+        <li><a href="#" class="flex items-center gap-2.5 px-2.5 py-2 rounded-[var(--radius-sm)] text-[13px] transition hover:bg-[var(--neutral-50)]" style="color: var(--neutral-700);"><i data-lucide="users" style="width:14px;height:14px;color:var(--neutral-400)"></i>Clients</a></li>
+        <li><a href="#" class="flex items-center gap-2.5 px-2.5 py-2 rounded-[var(--radius-sm)] text-[13px] transition hover:bg-[var(--neutral-50)]" style="color: var(--neutral-700);"><i data-lucide="folder" style="width:14px;height:14px;color:var(--neutral-400)"></i>Projects</a></li>
+        <li><a href="#" class="flex items-center gap-2.5 px-2.5 py-2 rounded-[var(--radius-sm)] text-[13px] transition hover:bg-[var(--neutral-50)]" style="color: var(--neutral-700);"><i data-lucide="check-square" style="width:14px;height:14px;color:var(--neutral-400)"></i>Tasks</a></li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ===== NEW PROJECT MODAL ===== -->
+<div id="newproj-modal" class="hidden fixed inset-0 z-[60] items-start justify-center pt-[15vh] px-4" role="dialog" aria-modal="true" aria-label="New project">
+  <div data-backdrop class="absolute inset-0 bg-neutral-900/30 backdrop-blur-sm"></div>
+  <div class="modal-enter relative bg-white rounded-[var(--radius-xl)] max-w-[480px] w-full overflow-hidden" style="box-shadow: var(--shadow-modal);">
+    <div class="flex items-center justify-between px-5 py-4" style="border-bottom: 1px solid var(--neutral-100);">
+      <h3 class="text-[15px] font-semibold" style="color: var(--neutral-900);">New Project</h3>
+      <button data-close aria-label="Close new project" class="p-1 rounded transition hover:bg-[var(--neutral-100)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]">
+        <i data-lucide="x" style="width:14px;height:14px;color:var(--neutral-500)"></i>
+      </button>
+    </div>
+    <div class="p-5 space-y-4">
+      <div>
+        <label class="block text-[12px] font-medium mb-1.5" style="color: var(--neutral-700);">Project name</label>
+        <input id="newproj-name" type="text" placeholder="e.g. Apex Brand Identity"
+               class="w-full px-3 py-2 text-[13px] rounded-[var(--radius-md)] outline-none transition focus:ring-2 focus:ring-[var(--accent)]"
+               style="border: 1px solid var(--neutral-200); color: var(--neutral-900);" />
+      </div>
+      <div>
+        <label class="block text-[12px] font-medium mb-1.5" style="color: var(--neutral-700);">Client</label>
+        <select id="newproj-client"
+                class="w-full px-3 py-2 text-[13px] rounded-[var(--radius-md)] outline-none transition focus:ring-2 focus:ring-[var(--accent)] bg-white"
+                style="border: 1px solid var(--neutral-200); color: var(--neutral-900);">
+          <option>Apex &amp; Co.</option>
+          <option>Lumen Health</option>
+          <option>Northgate Coffee</option>
+          <option>Vela Studio</option>
+          <option>Hearth Bakery</option>
+          <option>Orbit Labs</option>
+          <option>+ New Client</option>
+        </select>
+      </div>
+    </div>
+    <div class="flex justify-end gap-2 px-5 py-3.5" style="border-top: 1px solid var(--neutral-100); background: var(--neutral-50);">
+      <button data-close class="btn-ghost-modal px-3.5 py-1.5 text-[13px] rounded-[var(--radius-md)] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2"
+              style="color: var(--neutral-700);">Cancel</button>
+      <button id="newproj-create" class="btn-accent px-3.5 py-1.5 text-[13px] font-medium rounded-[var(--radius-md)] text-white transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2">
+        Create Project
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== AI ASSISTANT POPOVER ===== -->
+<div id="ai-modal" class="hidden fixed inset-0 z-[60]" role="dialog" aria-modal="true" aria-label="AI Assistant">
+  <div data-backdrop class="absolute inset-0 bg-neutral-900/20"></div>
+  <div id="ai-panel"
+       class="popover-enter absolute bottom-0 sm:bottom-5 left-0 right-0 sm:left-auto sm:right-5 mx-auto sm:mx-0 sm:max-w-[400px] bg-white overflow-hidden"
+       style="border-radius: var(--radius-xl) var(--radius-xl) 0 0; box-shadow: var(--shadow-modal); border: 1px solid var(--neutral-200);">
+    <div class="flex items-center justify-between px-5 py-3.5" style="border-bottom: 1px solid var(--neutral-100);">
+      <div class="flex items-center gap-1.5">
+        <i data-lucide="sparkles" style="width:14px;height:14px;color:var(--accent)"></i>
+        <h3 class="text-[14px] font-semibold" style="color: var(--neutral-900);">AI Assistant</h3>
+      </div>
+      <button data-close aria-label="Close AI Assistant" class="p-1 rounded transition hover:bg-[var(--neutral-100)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]">
+        <i data-lucide="x" style="width:14px;height:14px;color:var(--neutral-500)"></i>
+      </button>
+    </div>
+
+    <div id="ai-step-options" class="p-4 grid grid-cols-2 gap-2.5">
+      <button data-ai-option="proposal"
+              class="ai-option-card text-left p-3.5 rounded-[var(--radius-md)] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
+              style="border: 1px solid var(--neutral-200); background: white;">
+        <div class="flex items-center gap-1.5 mb-1.5">
+          <i data-lucide="file-text" style="width:14px;height:14px;color:var(--accent)"></i>
+          <span class="text-[13px] font-medium" style="color: var(--neutral-900);">Draft Proposal</span>
+        </div>
+        <div class="text-[11px] font-light" style="color: var(--neutral-500);">Generate a scoped project proposal.</div>
+      </button>
+      <button data-ai-option="email"
+              class="ai-option-card text-left p-3.5 rounded-[var(--radius-md)] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
+              style="border: 1px solid var(--neutral-200); background: white;">
+        <div class="flex items-center gap-1.5 mb-1.5">
+          <i data-lucide="mail" style="width:14px;height:14px;color:var(--accent)"></i>
+          <span class="text-[13px] font-medium" style="color: var(--neutral-900);">Draft Client Email</span>
+        </div>
+        <div class="text-[11px] font-light" style="color: var(--neutral-500);">Follow-ups, updates, check-ins.</div>
+      </button>
+    </div>
+
+    <div id="ai-step-result" class="hidden p-4">
+      <textarea id="ai-textarea" rows="8"
+                class="w-full px-3 py-2.5 text-[13px] rounded-[var(--radius-md)] outline-none transition focus:ring-2 focus:ring-[var(--accent)] resize-none"
+                style="border: 1px solid var(--neutral-200); color: var(--neutral-800); font-family: 'Inter', sans-serif;"></textarea>
+      <div class="flex justify-between items-center mt-3">
+        <button id="ai-back" class="btn-ghost-text text-[12px] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] rounded"
+                style="color: var(--neutral-500);">← Back</button>
+        <button id="ai-copy" class="btn-accent inline-flex items-center gap-1.5 px-3 py-1.5 text-[12px] font-medium rounded-[var(--radius-md)] text-white transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2">
+          <i data-lucide="copy" style="width:12px;height:12px"></i>
+          <span id="ai-copy-label">Copy to clipboard</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SCRIPT ===== -->
+<script>
+(function () {
+  'use strict';
+
+  // ═══════════════════════════════════════════════════════════════
+  // 1. STATE & CONFIGURATION
+  // ═══════════════════════════════════════════════════════════════
+
+  const STORAGE_KEY = 'legacyasphere_ops_v1';
+
+  const defaultState = {
+    tasks: [
+      { id: 1, text: 'Send proposal to Lumen Health', time: '11:00 AM', priority: 'urgent', done: false },
+      { id: 2, text: 'Review Apex logo concepts v3',  time: '—',        priority: 'high',   done: false },
+      { id: 3, text: 'Client call: Vela Studio',      time: '2:00 PM',  priority: 'urgent', done: false },
+      { id: 4, text: 'Reply to Cascade feedback',     time: 'Today',    priority: 'normal', done: false },
+    ],
+    currentRange: '30D',
+  };
+
+  /**
+   * Loads persisted state from localStorage, falling back to defaultState.
+   * Shallow-merges so new defaultState keys are always present.
+   * @returns {{ tasks: Array, currentRange: string }}
+   */
+  function loadState() {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      return saved ? { ...defaultState, ...JSON.parse(saved) } : { ...defaultState };
+    } catch {
+      return { ...defaultState };
+    }
+  }
+
+  /**
+   * Persists tasks and currentRange to localStorage.
+   * Fails silently if storage is unavailable (private browsing, quota, etc.).
+   */
+  function saveState() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        tasks: state.tasks,
+        currentRange: state.currentRange,
+      }));
+    } catch { /* storage unavailable — fail silently */ }
+  }
+
+  const state = loadState();
+
+  // ═══════════════════════════════════════════════════════════════
+  // 2. STATIC DATA  (read-only — not persisted to storage)
+  // ═══════════════════════════════════════════════════════════════
+
+  const navItems = [
+    { icon: 'layout-dashboard', label: 'Dashboard', active: true },
+    { icon: 'users',            label: 'Clients' },
+    { icon: 'folder',           label: 'Projects' },
+    { icon: 'git-branch',       label: 'Pipeline' },
+    { icon: 'check-square',     label: 'Tasks' },
+    { icon: 'activity',         label: 'Activity' },
+    { icon: 'file-text',        label: 'Files' },
+  ];
+
+  const metrics = [
+    { id: 'spark-rev',  label: 'Revenue MTD',     value: '$24,580', change: '+12.4%', changeIcon: 'arrow-up-right',   trend: 'up',   sub: 'vs. last month', data: [11, 9, 13, 10, 14, 12, 15, 11, 16, 14, 17], tone: 'success' },
+    { id: 'spark-proj', label: 'Active Projects', value: '8',       change: '+2',     changeIcon: 'arrow-up-right',   trend: 'up',   sub: 'this week',      data: [3, 5, 4, 6, 5, 7, 6, 8, 7, 8, 8],          tone: 'success' },
+    { id: 'spark-cli',  label: 'Active Clients',  value: '14',      change: '+1',     changeIcon: 'arrow-up-right',   trend: 'flat', sub: 'this month',     data: [10, 11, 12, 11, 13, 12, 13, 14, 13, 14, 14], tone: 'success' },
+    { id: 'spark-hrs',  label: 'Hours Logged',    value: '142h',    change: '−8h',    changeIcon: 'arrow-down-right', trend: 'down', sub: 'vs. last week',  data: [16, 15, 17, 14, 16, 15, 13, 14, 12, 13, 11], tone: 'danger'  },
+  ];
+
+  const chartDatasets = {
+    '7D': {
+      data: [820, 950, 880, 1100, 980, 1250, 1180],
+      labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+      pointLabels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+      projected: '$8,160',
+    },
+    '30D': {
+      data: [600, 720, 650, 810, 760, 940, 870, 1020, 960, 1140, 1080, 950, 1200, 1050, 1180, 1300, 1240, 1100, 1380, 1280, 1420, 1360, 1500, 1440, 1380, 1560, 1480, 1620, 1540, 1700],
+      labels: ['May 1', 'May 8', 'May 15', 'May 22', 'May 30'],
+      pointLabels: Array.from({ length: 30 }, (_, i) => `May ${i + 1}`),
+      projected: '$31,200',
+    },
+    '90D': {
+      data: Array.from({ length: 90 }, (_, i) => Math.round(500 + i * 9 + Math.sin(i * 0.4) * 200 + Math.cos(i * 0.2) * 120)),
+      labels: ['Mar 1', 'Mar 23', 'Apr 14', 'May 6', 'May 30'],
+      pointLabels: Array.from({ length: 90 }, (_, i) => {
+        const d = new Date(2025, 2, 1);
+        d.setDate(d.getDate() + i);
+        return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      }),
+      projected: '$78,400',
+    },
+  };
+
+  const priorityToColor = { urgent: 'var(--danger)', high: 'var(--warning)', normal: 'var(--neutral-300)' };
+
+  const statusConfig = {
+    'In Progress':       { color: 'var(--accent)',   bg: 'var(--accent-light)' },
+    'In Review':         { color: 'var(--warning)',  bg: 'var(--warning-light)' },
+    'In Revision':       { color: 'var(--revision)', bg: 'var(--revision-light)' },
+    'Awaiting Feedback': { color: 'var(--violet)',   bg: 'var(--violet-light)' },
+    'Planning':          { color: '#64748b',         bg: '#f8fafc' },
+  };
+
+  const projects = [
+    { name: 'Apex Brand Identity',      client: 'Apex & Co.',       status: 'In Progress', due: '2025-06-05' },
+    { name: 'Lumen Website Redesign',   client: 'Lumen Health',     status: 'In Review',   due: '2025-05-22' },
+    { name: 'Northgate Marketing Site', client: 'Northgate Coffee', status: 'In Progress', due: '2025-05-28' },
+    { name: 'Vela Mobile App UI',       client: 'Vela Studio',      status: 'In Progress', due: '2025-06-10' },
+    { name: 'Hearth Logo System',       client: 'Hearth Bakery',    status: 'In Revision', due: '2025-05-21' },
+    { name: 'Orbit Design System',      client: 'Orbit Labs',       status: 'Planning',    due: '2025-07-01' },
+  ];
+
+  const activities = [
+    { color: 'var(--success)',     text: '<strong>Lumen Health</strong> paid invoice <strong>#1042 · $4,200</strong>',               time: '2h ago' },
+    { color: 'var(--accent)',      text: '<strong>Daniela</strong> approved <strong>Apex logo concept v3</strong>',                   time: '5h ago' },
+    { color: 'var(--neutral-300)', text: '<strong>You</strong> moved <strong>Vela Mobile App → In Progress</strong>',                time: 'Yesterday' },
+    { color: 'var(--revision)',    text: '<strong>Hearth Bakery</strong> requested revisions on <strong>Hearth Logo System</strong>', time: 'Yesterday' },
+    { color: 'var(--warning)',     text: '<strong>Cascade kickoff</strong> rescheduled to next Thursday',                             time: '2d ago' },
+    { color: 'var(--success)',     text: '<strong>Orbit Labs</strong> signed contract for <strong>Orbit Design System</strong>',     time: '2d ago' },
+  ];
+
+  // ═══════════════════════════════════════════════════════════════
+  // 3. UTILITIES & HELPERS
+  // ═══════════════════════════════════════════════════════════════
+
+  const root = document.documentElement;
+
+  /**
+   * Reads a CSS custom property from :root at runtime.
+   * Used to color SVG elements (sparklines, revenue chart, status dots)
+   * so all color values remain in the :root token system.
+   * @param {string} name - e.g. '--accent'
+   * @returns {string}
+   */
+  const cssVar = (name) => getComputedStyle(root).getPropertyValue(name).trim();
+
+  /**
+   * Returns the number of whole days between today and a date string.
+   * @param {string} dateStr - ISO date string e.g. '2025-06-05'
+   * @returns {number}
+   */
+  function daysUntil(dateStr) {
+    const target = new Date(dateStr);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return Math.ceil((target - today) / 86400000);
+  }
+
+  /**
+   * Formats a date string to a short human-readable label.
+   * @param {string} dateStr
+   * @returns {string} e.g. 'Jun 5'
+   */
+  function formatDueDate(dateStr) {
+    return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  }
+
+  /** Syncs the task counter badge with the current task array length. */
+  function updateTaskCount() {
+    document.getElementById('task-count').textContent = state.tasks.length;
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  // 4. UI RENDERERS
+  // ═══════════════════════════════════════════════════════════════
+
+  /** Sets the greeting and date line based on the current hour. */
+  function setGreeting() {
+    const h = new Date().getHours();
+    let g = 'Good evening';
+    if (h >= 5 && h <= 11) g = 'Good morning';
+    else if (h >= 12 && h <= 17) g = 'Good afternoon';
+    document.getElementById('greeting').textContent = `${g}, Alex`;
+    const dateStr = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+    document.getElementById('date-line').textContent = `${dateStr} · A snapshot of your studio.`;
+  }
+
+  /**
+   * Renders the primary sidebar navigation from the navItems array.
+   * Hover is handled entirely via CSS (.nav-item class) — no inline handlers.
+   */
+  function renderNav() {
+    const nav = document.getElementById('primary-nav');
+    nav.innerHTML = navItems.map(item => {
+      if (item.active) {
+        return `
+          <a href="#" aria-current="page"
+             class="flex items-center gap-3 px-3 py-2 rounded-[var(--radius-md)] text-[13px] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--sidebar-bg)]"
+             style="background: var(--sidebar-active); color: var(--sidebar-text-active); font-weight: 500;">
+            <i data-lucide="${item.icon}" style="width:16px;height:16px"></i>
+            <span>${item.label}</span>
+          </a>
+        `;
+      }
+      return `
+        <a href="#"
+           class="nav-item flex items-center gap-3 px-3 py-2 rounded-[var(--radius-md)] text-[13px] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--sidebar-bg)]"
+           style="color: var(--sidebar-text); font-weight: 400;">
+          <i data-lucide="${item.icon}" style="width:16px;height:16px"></i>
+          <span>${item.label}</span>
+        </a>
+      `;
+    }).join('');
+  }
+
+  /**
+   * Renders a sparkline SVG into an existing <svg> element.
+   * Colors are resolved from CSS custom properties at runtime via cssVar().
+   * @param {string} id      - Target SVG element id
+   * @param {number[]} data  - Array of numeric data points
+   * @param {'up'|'down'|'flat'} trend - Determines line color
+   */
+  function renderSpark(id, data, trend) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const W = 80, H = 28;
+    const min = Math.min(...data);
+    const max = Math.max(...data);
+    const range = max - min || 1;
+    const pts = data.map((v, i) => [
+      (i / (data.length - 1)) * W,
+      H - ((v - min) / range) * (H * 0.85) - H * 0.075,
+    ]);
+    const linePath = pts.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p[0].toFixed(2)} ${p[1].toFixed(2)}`).join(' ');
+    const areaPath = `M 0 ${H} L ${pts.map(p => `${p[0].toFixed(2)} ${p[1].toFixed(2)}`).join(' L ')} L ${W} ${H} Z`;
+
+    const color = trend === 'up'   ? cssVar('--accent')
+                : trend === 'down' ? cssVar('--danger')
+                                   : cssVar('--neutral-400');
+    const gradId = `grad-spark-${id}`;
+    el.setAttribute('width', '80');
+    el.setAttribute('height', '28');
+    el.innerHTML = `
+      <defs>
+        <linearGradient id="${gradId}" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%"   stop-color="${color}" stop-opacity="0.15"/>
+          <stop offset="100%" stop-color="${color}" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+      <path d="${areaPath}" fill="url(#${gradId})"/>
+      <path d="${linePath}" fill="none" stroke="${color}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    `;
+  }
+
+  /**
+   * Renders all four KPI metric cards into #metric-grid.
+   * Hover state is handled via CSS (.metric-card) — no inline JS handlers.
+   */
+  function renderMetrics() {
+    const grid = document.getElementById('metric-grid');
+    grid.innerHTML = metrics.map(m => {
+      const badgeStyle = m.tone === 'success'
+        ? 'color: #047857; background: var(--success-light);'
+        : 'color: #be123c; background: var(--danger-light);';
+      return `
+        <div class="metric-card relative bg-white rounded-[var(--radius-lg)] p-5"
+             style="border: 1px solid var(--neutral-200); box-shadow: var(--shadow-card);">
+          <div class="flex items-start justify-between mb-3">
+            <span class="text-[12px] font-medium uppercase tracking-wider" style="color: var(--neutral-500);">${m.label}</span>
+          </div>
+          <div class="flex items-end justify-between gap-2">
+            <div class="min-w-0">
+              <div class="text-[28px] font-semibold tracking-tight tabular leading-none" style="color: var(--neutral-900);">${m.value}</div>
+              <div class="flex items-center gap-1.5 mt-2.5 flex-wrap">
+                <span class="inline-flex items-center gap-0.5 text-[11px] font-medium px-1.5 py-0.5 rounded-[var(--radius-sm)] tabular" style="${badgeStyle}">
+                  <i data-lucide="${m.changeIcon}" style="width:10px;height:10px"></i>${m.change}
+                </span>
+                <span class="text-[11px] font-light" style="color: var(--neutral-500);">${m.sub}</span>
+              </div>
+            </div>
+            <svg id="${m.id}" class="flex-shrink-0"></svg>
+          </div>
+          <a href="#" class="view-link absolute bottom-3 right-4 text-[11px] font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] rounded" style="color: var(--accent);">View →</a>
+        </div>
+      `;
+    }).join('');
+    metrics.forEach(m => renderSpark(m.id, m.data, m.trend));
+  }
+
+  /**
+   * Mutates a single checkbox button element's inner content to reflect done state.
+   * Called by the delegated task-list click handler to avoid full renderTasks() re-renders.
+   * @param {HTMLElement} btn      - The [data-toggle] button element
+   * @param {boolean} done         - New done state
+   * @param {string} priority      - 'urgent' | 'high' | 'normal'
+   */
+  function renderCheckbox(btn, done, priority) {
+    btn.innerHTML = `
+      <span class="absolute inset-0 rounded-[3px] transition"
+            style="border: 1px solid ${done ? 'var(--accent)' : 'var(--neutral-300)'}; background: ${done ? 'var(--accent)' : 'transparent'};"></span>
+      ${done ? `<svg viewBox="0 0 16 16" width="10" height="10" fill="none" class="relative z-10"><path d="M3 8.5l3 3 7-7" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>` : ''}
+      <span class="priority-dot absolute -right-0.5 -top-0.5 w-1.5 h-1.5 rounded-full" style="background: ${priorityToColor[priority]};"></span>
+    `;
+  }
+
+  /**
+   * Renders all task list items from state.tasks.
+   * Does NOT attach click listeners — toggle events are delegated via #task-list.
+   * Hover state handled via CSS (.task-row) — no inline JS handlers.
+   */
+  function renderTasks() {
+    const list = document.getElementById('task-list');
+    list.innerHTML = state.tasks.map(t => `
+      <li data-task-id="${t.id}"
+          class="${t.done ? 'task-done' : ''} task-row group flex items-center gap-3 py-2 px-2 -mx-2 rounded-[var(--radius-sm)] cursor-pointer">
+        <button data-toggle aria-label="${t.done ? 'Mark task incomplete' : 'Mark task complete'}"
+                class="relative flex items-center justify-center w-4 h-4 flex-shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] rounded-[3px]">
+          <span class="absolute inset-0 rounded-[3px] transition"
+                style="border: 1px solid ${t.done ? 'var(--accent)' : 'var(--neutral-300)'}; background: ${t.done ? 'var(--accent)' : 'transparent'};"></span>
+          ${t.done ? `<svg viewBox="0 0 16 16" width="10" height="10" fill="none" class="relative z-10"><path d="M3 8.5l3 3 7-7" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>` : ''}
+          <span class="priority-dot absolute -right-0.5 -top-0.5 w-1.5 h-1.5 rounded-full" style="background: ${priorityToColor[t.priority]};"></span>
+        </button>
+        <span class="task-text flex-1 text-[13px] leading-tight" style="color: var(--neutral-800);">${t.text}</span>
+        <span class="text-[11px] tabular whitespace-nowrap font-light" style="color: var(--neutral-500);">${t.time}</span>
+      </li>
+    `).join('');
+    updateTaskCount();
+  }
+
+  /**
+   * Renders the "Add task" button into #task-add-wrap.
+   * A single direct listener is attached here (not a loop) — acceptable per architecture.
+   */
+  function renderAddTaskBtn() {
+    const wrap = document.getElementById('task-add-wrap');
+    wrap.innerHTML = `
+      <button id="add-task-btn"
+              class="btn-ghost-text flex items-center gap-1.5 text-[12px] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] rounded"
+              style="color: var(--neutral-500);">
+        <i data-lucide="plus" style="width:12px;height:12px"></i> Add task
+      </button>
+    `;
+    document.getElementById('add-task-btn').addEventListener('click', showAddTaskInput);
+    if (window.lucide) lucide.createIcons({ nodes: [wrap] });
+  }
+
+  /** Swaps the add-task button for a text input field. */
+  function showAddTaskInput() {
+    const wrap = document.getElementById('task-add-wrap');
+    wrap.innerHTML = `
+      <input id="new-task-input" type="text" placeholder="New task — press Enter"
+             class="w-full px-2.5 py-1.5 text-[13px] rounded-[var(--radius-sm)] outline-none transition focus:ring-2 focus:ring-[var(--accent)]"
+             style="border: 1px solid var(--neutral-200);" />
+    `;
+    const input = document.getElementById('new-task-input');
+    input.focus();
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && input.value.trim()) {
+        const newId = Math.max(...state.tasks.map(t => t.id), 0) + 1;
+        state.tasks.push({ id: newId, text: input.value.trim(), time: '—', priority: 'normal', done: false });
+        saveState();
+        renderTasks();
+        renderAddTaskBtn();
+      } else if (e.key === 'Escape') {
+        renderAddTaskBtn();
+      }
+    });
+    input.addEventListener('blur', () => setTimeout(() => {
+      if (document.activeElement !== input) renderAddTaskBtn();
+    }, 150));
+  }
+
+  /**
+   * Renders the active projects table from the projects array.
+   * Hover state handled via CSS (.project-row) — no inline JS handlers.
+   */
+  function renderProjects() {
+    const wrap = document.getElementById('project-list');
+    wrap.innerHTML = projects.map((p, i) => {
+      const cfg = statusConfig[p.status] || statusConfig['Planning'];
+      const days = daysUntil(p.due);
+      const formatted = formatDueDate(p.due);
+      let dateStyle = 'color: var(--neutral-500); font-weight: 400;';
+      let datePrefix = '';
+      if (days <= 3) {
+        dateStyle = 'color: var(--danger); font-weight: 600;';
+        datePrefix = '⚠ ';
+      } else if (days <= 7) {
+        dateStyle = 'color: var(--warning); font-weight: 500;';
+      }
+      const isLast = i === projects.length - 1;
+      return `
+        <a href="#"
+           class="project-row group flex items-center gap-3 sm:gap-4 px-5 sm:px-6 py-3.5 transition cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] focus-visible:ring-inset"
+           style="${isLast ? '' : 'border-bottom: 1px solid var(--neutral-100);'}">
+          <div class="flex-1 min-w-0">
+            <div class="text-[13.5px] font-medium truncate" style="color: var(--neutral-900);">${p.name}</div>
+            <div class="text-[12px] mt-0.5 truncate font-light" style="color: var(--neutral-500);">${p.client}</div>
+          </div>
+          <div class="flex items-center gap-1.5 text-[12px]">
+            <span class="w-1.5 h-1.5 rounded-full flex-shrink-0" style="background: ${cfg.color};"></span>
+            <span class="hidden sm:inline" style="color: var(--neutral-700);">${p.status}</span>
+          </div>
+          <div class="text-[12px] tabular whitespace-nowrap w-16 text-right" style="${dateStyle}">${datePrefix}${formatted}</div>
+          <i data-lucide="chevron-right" style="width:14px;height:14px;color:var(--neutral-300);"></i>
+        </a>
+      `;
+    }).join('');
+    document.getElementById('project-count').textContent = projects.length;
+  }
+
+  /** Renders the activity feed timeline. */
+  function renderActivity() {
+    const ol = document.getElementById('activity-list');
+    ol.innerHTML = activities.map(a => `
+      <li class="relative flex gap-3.5">
+        <span class="relative z-10 mt-1 w-3.5 h-3.5 rounded-full border-2 border-white flex-shrink-0" style="background: ${a.color};"></span>
+        <div class="flex-1 min-w-0">
+          <div class="text-[13px] leading-snug" style="color: var(--neutral-800);">${a.text}</div>
+          <div class="text-[11px] mt-0.5 tabular font-light" style="color: var(--neutral-500);">${a.time}</div>
+        </div>
+      </li>
+    `).join('');
+  }
+
+  /**
+   * Renders the revenue SVG chart for the given time range.
+   * Calculates SVG coordinate space from the dataset, draws grid lines,
+   * Y-axis labels, area fill, and registers hit zones for hover interaction.
+   * @param {string} rangeKey - One of '7D', '30D', '90D'
+   */
+  function renderRevenueChart(rangeKey) {
+    const svg = document.getElementById('rev-chart');
+    const ds = chartDatasets[rangeKey];
+    const data = ds.data;
+    const W = 600, H = 200, PAD_T = 16, PAD_B = 16, PAD_L = 38, PAD_R = 8;
+    const plotW = W - PAD_L - PAD_R;
+    const plotH = H - PAD_T - PAD_B;
+
+    const min = Math.min(...data);
+    const max = Math.max(...data);
+    const range = max - min || 1;
+
+    const pts = data.map((v, i) => [
+      PAD_L + (i / (data.length - 1)) * plotW,
+      PAD_T + plotH - ((v - min) / range) * plotH,
+    ]);
+    const linePath = pts.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p[0].toFixed(2)} ${p[1].toFixed(2)}`).join(' ');
+    const areaPath = `M ${PAD_L} ${PAD_T + plotH} L ${pts.map(p => `${p[0].toFixed(2)} ${p[1].toFixed(2)}`).join(' L ')} L ${PAD_L + plotW} ${PAD_T + plotH} Z`;
+
+    const accent     = cssVar('--accent');
+    const gridColor  = cssVar('--neutral-100');
+    const labelColor = cssVar('--neutral-400');
+
+    // Y-axis: 4 labels (min → max)
+    const yLabels = [0, 1, 2, 3].map(i => {
+      const v = min + (range * i) / 3;
+      const y = PAD_T + plotH - (i / 3) * plotH;
+      const formatted = v >= 1000 ? `$${(v / 1000).toFixed(1)}k` : `$${(v / 1000).toFixed(2)}k`;
+      return `<text x="${PAD_L - 6}" y="${y + 3}" text-anchor="end" font-size="10" fill="${labelColor}" font-family="Inter" font-weight="300">${formatted}</text>`;
+    }).join('');
+
+    // Horizontal grid lines at top, 33%, 66%
+    const gridLines = [0, 0.33, 0.66].map(p => {
+      const y = PAD_T + p * plotH;
+      return `<line x1="${PAD_L}" y1="${y}" x2="${PAD_L + plotW}" y2="${y}" stroke="${gridColor}" stroke-width="1"/>`;
+    }).join('');
+
+    // Invisible hit zones per data point
+    const segW = plotW / Math.max(data.length - 1, 1);
+    const hitZones = pts.map((p, i) => {
+      const x = p[0] - segW / 2;
+      return `<rect class="hit" data-i="${i}" x="${x}" y="${PAD_T}" width="${segW}" height="${plotH}" fill="transparent" style="cursor:crosshair"></rect>`;
+    }).join('');
+
+    svg.innerHTML = `
+      <defs>
+        <linearGradient id="grad-revenue" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%"   stop-color="${accent}" stop-opacity="0.18"/>
+          <stop offset="100%" stop-color="${accent}" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+      ${gridLines}
+      ${yLabels}
+      <path d="${areaPath}" fill="url(#grad-revenue)"/>
+      <path d="${linePath}" fill="none" stroke="${accent}" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+      <g id="chart-hover-layer"></g>
+      ${hitZones}
+    `;
+
+    document.getElementById('chart-labels').innerHTML = ds.labels.map(l => `<span>${l}</span>`).join('');
+    document.getElementById('projected-value').textContent = ds.projected;
+
+    updateRangeButtons(rangeKey);
+    bindChartHover(pts, ds, plotH, PAD_T);
+  }
+
+  /**
+   * Switches the chart to a new time range with a brief opacity fade transition.
+   * Guards against redundant calls when the same range is already active.
+   * @param {string} rangeKey - One of '7D', '30D', '90D'
+   */
+  function switchChartRange(rangeKey) {
+    if (rangeKey === state.currentRange) return;
+
+    updateRangeButtons(rangeKey);
+
+    const svg    = document.getElementById('rev-chart');
+    const labels = document.getElementById('chart-labels');
+
+    svg.style.transition    = 'opacity 0.15s ease';
+    labels.style.transition = 'opacity 0.15s ease';
+    svg.style.opacity       = '0.35';
+    labels.style.opacity    = '0.35';
+
+    setTimeout(() => {
+      state.currentRange = rangeKey;
+      saveState();
+      renderRevenueChart(rangeKey);
+      svg.style.opacity    = '1';
+      labels.style.opacity = '1';
+    }, 140);
+  }
+
+  /**
+   * Updates range toggle button styles to reflect the active range.
+   * Extracted so switchChartRange can preview the active state before the fade.
+   * @param {string} rangeKey - One of '7D', '30D', '90D'
+   */
+  function updateRangeButtons(rangeKey) {
+    document.querySelectorAll('#range-toggle button').forEach(btn => {
+      const active = btn.dataset.range === rangeKey;
+      btn.style.background  = active ? cssVar('--neutral-100') : 'transparent';
+      btn.style.color       = active ? cssVar('--neutral-900') : cssVar('--neutral-500');
+      btn.style.fontWeight  = active ? '500' : '400';
+      btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+    });
+  }
+
+  /**
+   * Binds hover and touch interactions to each SVG hit zone in the revenue chart.
+   * Uses AbortController to clean up previous listeners when the chart re-renders.
+   * Tooltip position is clamped to chart-wrap boundaries with improved viewport math.
+   * @param {number[][]} pts   - Array of [x, y] SVG coordinate pairs
+   * @param {object} ds        - Dataset object containing data and pointLabels
+   * @param {number} plotH     - Pixel height of the plotable area
+   * @param {number} PAD_T     - Top padding (SVG coordinate units)
+   */
+  let _chartHoverAbort = null;
+
+  function bindChartHover(pts, ds, plotH, PAD_T) {
+    const svg       = document.getElementById('rev-chart');
+    const tooltip   = document.getElementById('chart-tooltip');
+    const wrap      = document.getElementById('chart-wrap');
+    const hoverLayer = document.getElementById('chart-hover-layer');
+    const accent    = cssVar('--accent');
+
+    // Abort any previous set of hover listeners
+    if (_chartHoverAbort) _chartHoverAbort.abort();
+    _chartHoverAbort = new AbortController();
+    const { signal } = _chartHoverAbort;
+
+    // Hide tooltip immediately on resize (re-render follows via debounce)
+    window.addEventListener('resize', () => {
+      tooltip.classList.add('hidden');
+      hoverLayer.innerHTML = '';
+    }, { passive: true, signal });
+
+    svg.querySelectorAll('rect.hit').forEach(rect => {
+      const showAt = (i) => {
+        const p = pts[i];
+        hoverLayer.innerHTML = `
+          <line x1="${p[0]}" y1="${p[1]}" x2="${p[0]}" y2="${PAD_T + plotH}"
+                stroke="${accent}" stroke-width="1" stroke-dasharray="3 3" opacity="0.5"/>
+          <circle cx="${p[0]}" cy="${p[1]}" r="3" fill="${accent}"/>
+        `;
+        const value = ds.data[i];
+        const label = ds.pointLabels[i];
+        tooltip.textContent = `${label} · $${Math.round(value).toLocaleString()}`;
+        tooltip.classList.remove('hidden');
+
+        const svgRect  = svg.getBoundingClientRect();
+        const wrapRect = wrap.getBoundingClientRect();
+        const scaleX   = svgRect.width / 600;
+        const scaleY   = svgRect.height / 200;
+        const px = (svgRect.left - wrapRect.left) + p[0] * scaleX;
+        const py = (svgRect.top  - wrapRect.top)  + p[1] * scaleY;
+
+        tooltip.style.left = '0px';
+        tooltip.style.top  = '0px';
+        const tw = tooltip.offsetWidth;
+        const th = tooltip.offsetHeight;
+
+        // Improved boundary clamping: clamp against viewport width relative to wrap offset
+        const viewportW = document.documentElement.clientWidth;
+        const wrapLeft  = wrapRect.left;
+        let left = px - tw / 2;
+        let top  = py - th - 10;
+        left = Math.max(4, Math.min(left, viewportW - wrapLeft - tw - 8));
+        if (top < 0) top = py + 14;
+
+        tooltip.style.left = `${left}px`;
+        tooltip.style.top  = `${top}px`;
+      };
+
+      const hide = () => {
+        hoverLayer.innerHTML = '';
+        tooltip.classList.add('hidden');
+      };
+
+      rect.addEventListener('mouseenter', () => showAt(+rect.dataset.i), { signal });
+      rect.addEventListener('mouseleave', hide, { signal });
+      rect.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        showAt(+rect.dataset.i);
+      }, { passive: false, signal });
+    });
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  // 5. MODAL CONTROLLERS
+  // ═══════════════════════════════════════════════════════════════
+
+  const openModals = new Set();
+
+  function showModal(id) {
+    const el = document.getElementById(id);
+    el.classList.remove('hidden');
+    el.classList.add('flex');
+    openModals.add(id);
+    document.body.style.overflow = 'hidden';
+  }
+
+  function hideModal(id) {
+    const el = document.getElementById(id);
+    el.classList.add('hidden');
+    el.classList.remove('flex');
+    openModals.delete(id);
+    maybeRestoreScroll();
+  }
+
+  function showAI() {
+    document.getElementById('ai-modal').classList.remove('hidden');
+    openModals.add('ai-modal');
+    document.body.style.overflow = 'hidden';
+    document.getElementById('ai-step-options').classList.remove('hidden');
+    document.getElementById('ai-step-result').classList.add('hidden');
+  }
+
+  function hideAI() {
+    document.getElementById('ai-modal').classList.add('hidden');
+    openModals.delete('ai-modal');
+    maybeRestoreScroll();
+  }
+
+  /** Restores body scroll only when no modals or sidebar overlays are open. */
+  function maybeRestoreScroll() {
+    const sidebarOpen = !document.getElementById('backdrop').classList.contains('hidden');
+    if (openModals.size === 0 && !sidebarOpen) {
+      document.body.style.overflow = '';
+    }
+  }
+
+  function openSearch() {
+    showModal('search-modal');
+    setTimeout(() => document.getElementById('search-input').focus(), 30);
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  // 6. EVENT HANDLERS (Delegated)
+  // All addEventListener calls are grouped here, outside render loops.
+  // ═══════════════════════════════════════════════════════════════
+
+  // ── Task list: single delegated listener — attached ONCE ──────
+  document.getElementById('task-list').addEventListener('click', (e) => {
+    const toggleBtn = e.target.closest('[data-toggle]');
+    if (!toggleBtn) return;
+
+    const li = toggleBtn.closest('[data-task-id]');
+    if (!li) return;
+
+    const id   = +li.dataset.taskId;
+    const task = state.tasks.find(t => t.id === id);
+    if (!task) return;
+
+    task.done = !task.done;
+    saveState();
+
+    li.classList.toggle('task-done', task.done);
+    toggleBtn.setAttribute('aria-label', task.done ? 'Mark task incomplete' : 'Mark task complete');
+
+    renderCheckbox(toggleBtn, task.done, task.priority);
+
+    // Scoped Lucide re-init for the single mutated button only
+    if (window.lucide) lucide.createIcons({ nodes: [toggleBtn] });
+  });
+
+  // ── Chart range toggle: single delegated listener ─────────────
+  document.getElementById('range-toggle').addEventListener('click', (e) => {
+    const btn = e.target.closest('button[data-range]');
+    if (!btn) return;
+    switchChartRange(btn.dataset.range);
+  });
+
+  // ── Search ────────────────────────────────────────────────────
+  document.getElementById('topbar-search').addEventListener('click', openSearch);
+  document.getElementById('sidebar-search').addEventListener('click', openSearch);
+  document.querySelectorAll('#search-modal [data-backdrop], #search-modal [data-close]').forEach(el => {
+    el.addEventListener('click', () => hideModal('search-modal'));
+  });
+
+  // ── New project modal ─────────────────────────────────────────
+  document.getElementById('open-new-project').addEventListener('click', () => {
+    showModal('newproj-modal');
+    setTimeout(() => document.getElementById('newproj-name').focus(), 30);
+  });
+  document.querySelectorAll('#newproj-modal [data-backdrop], #newproj-modal [data-close]').forEach(el => {
+    el.addEventListener('click', () => hideModal('newproj-modal'));
+  });
+  document.getElementById('newproj-create').addEventListener('click', () => {
+    const btn = document.getElementById('newproj-create');
+    const original = btn.innerHTML;
+    btn.innerHTML = '✓ Created!';
+    btn.disabled = true;
+    setTimeout(() => {
+      hideModal('newproj-modal');
+      btn.innerHTML = original;
+      btn.disabled = false;
+      document.getElementById('newproj-name').value = '';
+    }, 800);
+  });
+
+  // ── AI Assistant ──────────────────────────────────────────────
+  document.getElementById('open-ai').addEventListener('click', showAI);
+  document.querySelectorAll('#ai-modal [data-backdrop], #ai-modal [data-close]').forEach(el => {
+    el.addEventListener('click', hideAI);
+  });
+  document.querySelectorAll('[data-ai-option]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const kind = btn.dataset.aiOption;
+      const ta   = document.getElementById('ai-textarea');
+      if (kind === 'proposal') {
+        ta.value = 'Hi [Client Name],\n\nThank you for the opportunity to work together. I\'d love to share a proposal for [Project Name].\n\nBased on our conversation, here\'s a scoped overview:\n\n• Discovery & strategy — 1 week\n• Concept exploration — 2 weeks\n• Refinement & delivery — 2 weeks\n\nInvestment: [Amount]\n\nHappy to walk you through this on a call.\n\n[Your name]\nLegacyaSphere Studio';
+      } else {
+        ta.value = 'Hi [Client Name],\n\nJust following up on [Project Name] — wanted to check if you had any questions on the latest draft.\n\nI\'ve also blocked time later this week if a quick review call would be helpful.\n\nLet me know what works.\n\nBest,\nAlex';
+      }
+      document.getElementById('ai-step-options').classList.add('hidden');
+      document.getElementById('ai-step-result').classList.remove('hidden');
+      setTimeout(() => ta.focus(), 30);
+    });
+  });
+  document.getElementById('ai-back').addEventListener('click', () => {
+    document.getElementById('ai-step-options').classList.remove('hidden');
+    document.getElementById('ai-step-result').classList.add('hidden');
+  });
+  document.getElementById('ai-copy').addEventListener('click', async () => {
+    const ta    = document.getElementById('ai-textarea');
+    const label = document.getElementById('ai-copy-label');
+    try {
+      await navigator.clipboard.writeText(ta.value);
+    } catch {
+      ta.select();
+      try { document.execCommand('copy'); } catch (_) {}
+    }
+    const prev = label.textContent;
+    label.textContent = 'Copied ✓';
+    setTimeout(() => { label.textContent = prev; }, 1400);
+  });
+
+  // ── Sidebar (mobile) ──────────────────────────────────────────
+  const sidebar  = document.getElementById('sidebar');
+  const backdrop = document.getElementById('backdrop');
+  const menuBtn  = document.getElementById('menu-btn');
+
+  function openSidebar() {
+    sidebar.classList.remove('-translate-x-full');
+    backdrop.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeSidebar() {
+    sidebar.classList.add('-translate-x-full');
+    backdrop.classList.add('hidden');
+    maybeRestoreScroll();
+  }
+  menuBtn.addEventListener('click', openSidebar);
+  backdrop.addEventListener('click', closeSidebar);
+
+  // ── Global keyboard shortcuts ─────────────────────────────────
+  document.addEventListener('keydown', (e) => {
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+      e.preventDefault();
+      if (document.getElementById('search-modal').classList.contains('hidden')) openSearch();
+      else hideModal('search-modal');
+      return;
+    }
+    if (e.key === 'Escape') {
+      if (!document.getElementById('search-modal').classList.contains('hidden'))  { hideModal('search-modal'); return; }
+      if (!document.getElementById('newproj-modal').classList.contains('hidden')) { hideModal('newproj-modal'); return; }
+      if (!document.getElementById('ai-modal').classList.contains('hidden'))      { hideAI(); return; }
+      if (!backdrop.classList.contains('hidden'))                                  { closeSidebar(); return; }
+    }
+  });
+
+  // ── Resize: debounced chart re-render ─────────────────────────
+  /**
+   * Debounced resize handler.
+   * Re-renders the active chart after 180ms to keep SVG coordinate data synced
+   * with the actual rendered pixel dimensions of the container.
+   */
+  let _resizeTimer;
+  window.addEventListener('resize', () => {
+    clearTimeout(_resizeTimer);
+    _resizeTimer = setTimeout(() => {
+      renderRevenueChart(state.currentRange);
+    }, 180);
+  });
+
+  // ═══════════════════════════════════════════════════════════════
+  // 7. INITIALIZATION
+  // ═══════════════════════════════════════════════════════════════
+
+  setGreeting();
+  renderNav();
+  renderMetrics();
+  renderRevenueChart(state.currentRange);
+  renderTasks();
+  renderAddTaskBtn();
+  renderProjects();
+  renderActivity();
+
+  // Initialize Lucide icons ONCE globally after all DOM is rendered.
+  // Subsequent updates use scoped lucide.createIcons({ nodes: [...] }).
+  if (window.lucide) lucide.createIcons();
+
+})();
+</script>
+
+</body>
+</html>
