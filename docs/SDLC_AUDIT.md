@@ -4,15 +4,16 @@
 **Prepared by:** Senior Product Architect + Staff Software Engineer (AI Pair)
 **Date:** 2026-06-08
 **Repository:** legacyasphere-id/Hybrid-Dashboard
-**Subject:** Reverse-engineering a high-fidelity prototype into a production-ready SaaS blueprint
+**Methodology:** Sphere Method v1.0
+**Subject:** Reverse-engineering a high-fidelity prototype into a production-ready SaaS blueprint using the Sphere Method
 
 ---
 
 ## Table of Contents
 
 1. [Executive Summary](#1-executive-summary)
-2. [Current SDLC Phase Assessment](#2-current-sdlc-phase-assessment)
-3. [SDLC Gap Analysis](#3-sdlc-gap-analysis)
+2. [Sphere Method — Phase Status Assessment](#2-sphere-method--phase-status-assessment)
+3. [Sphere Method — Gap Analysis by Phase](#3-sphere-method--gap-analysis-by-phase)
 4. [Product Vision & Scope](#4-product-vision--scope)
 5. [User Personas](#5-user-personas)
 6. [User Stories](#6-user-stories)
@@ -26,7 +27,7 @@
 14. [Deployment Strategy](#14-deployment-strategy)
 15. [Monitoring Strategy](#15-monitoring-strategy)
 16. [Production Readiness Checklist](#16-production-readiness-checklist)
-17. [SDLC Roadmap](#17-sdlc-roadmap)
+17. [Sphere Method Roadmap](#17-sphere-method-roadmap)
 
 ---
 
@@ -60,109 +61,337 @@ The Hybrid-Dashboard is a **polished, single-file HTML/CSS/JS prototype** for Le
 
 ---
 
-## 2. Current SDLC Phase Assessment
+## 2. Sphere Method — Phase Status Assessment
 
-### SDLC Phase Map
+This audit maps the current project state against **your Sphere Method v1.0** — the 8-phase methodology you have defined. This is the honest, unvarnished status of each phase.
+
+### Overall Progress Map
 
 ```
-Discovery → Requirements → Design → Development → Testing → Deployment → Monitoring
-   ✅           ⚠️ Partial    ✅        🔴 Start        ❌          ❌           ❌
+Phase 0        Phase 1        Phase 2        Phase 3        Phase 4        Phase 5        Phase 6        Phase 7
+Discovery      Planning       Design         Development    Quality        Release        Operations     Documentation
+⚠️ Partial     ❌ Not Started  ✅ Done        ❌ Not Started  ❌ Not Started  ❌ Not Started  ❌ Not Started  ❌ Not Started
 ```
 
-### Phase-by-Phase Breakdown
-
-#### Phase 1 — Discovery ✅ DONE
-You have validated a real problem space (studio management for creative agencies). The dashboard UI confirms stakeholder alignment on the product direction.
-
-#### Phase 2 — Requirements ⚠️ PARTIAL
-- **Exists:** Implicit requirements visible in the UI (metrics, projects, tasks)
-- **Missing:** Formal PRD, written user stories, acceptance criteria, non-functional requirements, business rules documentation
-
-#### Phase 3 — Design ✅ DONE
-- UI/UX design is complete and implemented as a working prototype
-- Design tokens are defined and applied consistently
-- Responsive behavior is implemented
-- **Missing:** Information architecture document, data flow diagrams, system architecture diagram, database ER diagram, API contract
-
-#### Phase 4 — Development 🔴 NOT STARTED
-- No backend exists
-- No database exists
-- No authentication exists
-- No real data pipeline exists
-- The frontend is a monolith HTML file — needs to be componentized
-
-#### Phase 5 — Testing ❌ NOT STARTED
-- No unit tests
-- No integration tests
-- No E2E tests
-- No test plan
-
-#### Phase 6 — Deployment ❌ NOT STARTED
-- No CI/CD pipeline
-- No environment config (dev/staging/prod)
-- Tailwind uses CDN (explicitly not production-ready — noted in the code itself)
-- No domain, no hosting, no SSL
-
-#### Phase 7 — Monitoring ❌ NOT STARTED
-- No error tracking
-- No performance monitoring
-- No uptime monitoring
-- No analytics
-
-### Verdict
-
-**Current Phase: Late Design / Pre-Development**
-
-You need to complete Requirements documentation, then enter Development with a proper architecture plan. This audit provides the bridge.
+> **Honest verdict:** You are completing Phase 2 and have not entered Phase 1 yet. The prototype was built before the blueprint. That is common and fixable — but it means you must go *backward* to fill Phase 0 and Phase 1 before you can move forward into Phase 3. This document is the Phase 1 output.
 
 ---
 
-## 3. SDLC Gap Analysis
+### Phase 0 — Discovery ⚠️ PARTIAL (60% Complete)
 
-### Artifacts Inventory
+**Goal (per Sphere Method):** Determine whether the idea is worth building.
 
-| SDLC Artifact | Exists | Quality | Priority to Create |
+| Deliverable | Status | Notes |
+|---|---|---|
+| Problem statement | ✅ Implicit | Visible in the UI design — studio ops is chaotic for agencies. Not formally written. |
+| Validation | ⚠️ Assumed | No documented interviews, surveys, or market research. Validation is the UI itself. |
+| Competitor analysis | ❌ Missing | No documented analysis of Bonsai, HoneyBook, Dubsado, Monday.com, Notion, Linear. |
+| Target user definition | ⚠️ Partial | Implied by UI (studio/agency context). Not formally documented as personas. |
+| Scope & constraints | ❌ Missing | No written constraints (budget, team size, timeline, tech limits). |
+| Success metrics | ❌ Missing | No KPIs defined. How will you know LegacyaSphere "succeeded"? |
+
+**What needs to happen:**
+Write a one-page Discovery Summary that captures: the problem in one sentence, who has it, why existing tools fail them, and what "success in 6 months" looks like numerically.
+
+---
+
+### Phase 1 — Planning ❌ NOT STARTED (5% — Only This Audit Exists)
+
+**Goal (per Sphere Method):** Create the blueprint before coding.
+
+| Deliverable | Status | Notes |
+|---|---|---|
+| PRD | ❌ Missing | This audit document is the foundation — a formal PRD must be extracted from it. |
+| Architecture Design | ❌ Missing | No system architecture diagram, no component topology, no data flow diagram. |
+| Database Design | ⚠️ Created here | The schema in this document is the first draft — it does not exist in the codebase yet. |
+| API Design | ⚠️ Created here | The API spec in this document is the first draft — nothing is implemented. |
+| Tech Stack Decision | ❌ Missing | No documented decision on frontend framework, backend language, or hosting. |
+| Environment Strategy | ❌ Missing | No dev/staging/production environment config exists. |
+| Third-Party Services | ❌ Missing | No documented list of services (auth, email, storage, payments, monitoring). |
+
+**What needs to happen:**
+Phase 1 is what you are currently in the process of completing. This audit document gives you the raw material. The next step is to finalize each Planning artifact into its own file.
+
+---
+
+### Phase 2 — Design ✅ DONE (90% Complete)
+
+**Goal (per Sphere Method):** Design user experience.
+
+| Deliverable | Status | Notes |
+|---|---|---|
+| User Flows | ⚠️ Implicit | The dashboard implies flows (create project, log task, view revenue) but they are not documented as formal diagrams. |
+| Wireframes | ✅ Done | The prototype IS the high-fidelity wireframe. |
+| UI Direction | ✅ Done | Dark sidebar, indigo accent, Inter typeface, design token system — all defined and consistent. |
+| Responsive Strategy | ✅ Done | Tailwind breakpoints (sm/md/lg) applied throughout. Mobile hamburger menu works. |
+| Accessibility Baseline | ⚠️ Partial | ARIA labels on some icons. No formal audit. Keyboard navigation not fully tested. |
+
+**What needs to happen:**
+Document the 5–6 primary user flows as simple numbered step lists or diagrams. Run a quick ARIA/keyboard navigation check. Phase 2 is otherwise complete.
+
+---
+
+### Phase 3 — Development ❌ NOT STARTED
+
+**Goal (per Sphere Method):** Build the actual system.
+
+| Deliverable | Status | Notes |
+|---|---|---|
+| Git Workflow | ⚠️ Exists | A branch exists but no branching convention is documented (feature/, fix/, release/). |
+| Branch Strategy | ❌ Missing | No documented convention for branch names, PR rules, or merge strategy. |
+| TDD | ❌ Missing | No tests exist. No TDD practice in place. |
+| Feature Development | ❌ Missing | No backend, no API, no real data. The dashboard renders hardcoded values. |
+| Code Style Standards | ❌ Missing | No `.eslintrc`, no `.prettierrc`, no style guide. |
+| Linting | ❌ Missing | No linting configured. |
+| CI Pipeline | ❌ Missing | No GitHub Actions or equivalent. |
+| Secrets Management | ❌ Missing | No `.env` files, no secrets manager, no documented secrets strategy. |
+
+**Blocking issue:** Cannot enter Development until Phase 1 artifacts (architecture + database + API design) are finalized. Do NOT start coding backend features without those decisions made.
+
+---
+
+### Phase 4 — Quality ❌ NOT STARTED
+
+**Goal (per Sphere Method):** Ensure the product works.
+
+| Deliverable | Status | Notes |
+|---|---|---|
+| Unit Tests | ❌ Missing | No test files exist anywhere in the repository. |
+| Integration Tests | ❌ Missing | No API testing, no database testing. |
+| Playwright E2E | ❌ Missing | No end-to-end test suite. |
+| Code Review | ❌ Missing | No PR review process established. |
+| Security Review | ❌ Missing | No OWASP review, no dependency scanning, no SAST. |
+| Performance Testing | ❌ Missing | No load testing. |
+| Cross-Device Testing | ⚠️ Partial | Responsive CSS exists but no documented testing across real devices. |
+
+---
+
+### Phase 5 — Release ❌ NOT STARTED
+
+**Goal (per Sphere Method):** Ship safely.
+
+| Deliverable | Status | Notes |
+|---|---|---|
+| Staging environment | ❌ Missing | No staging deployment exists. |
+| Production Deployment | ❌ Missing | Not deployed anywhere. |
+| Environment Validation | ❌ Missing | No process to validate env vars are correct before deploy. |
+| Smoke Tests | ❌ Missing | No smoke test script. |
+| Versioning | ❌ Missing | No semantic versioning. No `CHANGELOG.md`. No version in `package.json` (no package.json). |
+| Changelog | ❌ Missing | No changelog process. |
+| Rollback Plan | ❌ Missing | No documented rollback procedure. |
+
+---
+
+### Phase 6 — Operations ❌ NOT STARTED
+
+**Goal (per Sphere Method):** Keep the product healthy.
+
+| Deliverable | Status | Notes |
+|---|---|---|
+| Monitoring | ❌ Missing | No APM tool configured (Sentry, Datadog). |
+| Error Alerting | ❌ Missing | No error alerts. |
+| Analytics | ❌ Missing | No PostHog, Google Analytics, or Mixpanel. |
+| Backups | ❌ N/A | No database = nothing to back up yet. |
+| User Feedback | ❌ Missing | No feedback mechanism (in-app or external). |
+| Data Retention | ❌ Missing | No policy on how long data is kept. |
+| Iteration | ❌ Missing | No process for collecting and acting on feedback. |
+
+---
+
+### Phase 7 — Documentation ❌ NOT STARTED
+
+**Goal (per Sphere Method):** Preserve knowledge.
+
+| Deliverable | Status | Notes |
+|---|---|---|
+| README | ❌ Missing | No `README.md` exists in the repository. |
+| Architecture Docs | ⚠️ Created here | This audit is the first architecture document. |
+| API Docs | ⚠️ Created here | This audit contains the API spec. Needs to be extracted to OpenAPI/Swagger. |
+| Setup Guide | ❌ Missing | No local development setup guide. |
+| Decision Log | ❌ Missing | No record of why decisions were made (tech stack, data model choices, etc.). |
+
+---
+
+### Sphere Method Phase Score
+
+| Phase | Name | Score | Status |
 |---|---|---|---|
-| Product Vision Statement | ❌ | — | P0 |
-| Product Requirements Document (PRD) | ❌ | — | P0 |
-| User Personas | ❌ | — | P0 |
-| User Stories | ❌ | — | P0 |
-| Acceptance Criteria | ❌ | — | P0 |
-| Functional Requirements | ❌ | — | P0 |
-| Non-Functional Requirements | ❌ | — | P0 |
-| UI Wireframes / Prototype | ✅ | High | Done |
-| Design System / Tokens | ✅ | High | Done |
-| System Architecture Diagram | ❌ | — | P0 |
-| Database Schema | ❌ | — | P0 |
-| Entity Relationship Diagram (ERD) | ❌ | — | P0 |
-| API Specification (OpenAPI) | ❌ | — | P0 |
-| Authentication Model | ❌ | — | P0 |
-| Role & Permission Matrix | ❌ | — | P0 |
-| Data Flow Diagrams | ❌ | — | P1 |
-| Technical Stack Decision | ❌ | — | P0 |
-| Development Environment Setup | ❌ | — | P0 |
-| Code Style Guide / Linting | ❌ | — | P1 |
-| Git Branching Strategy | ⚠️ | Minimal | P1 |
-| Unit Tests | ❌ | — | P1 |
-| Integration Tests | ❌ | — | P1 |
-| E2E Tests | ❌ | — | P1 |
-| Test Plan | ❌ | — | P1 |
-| CI/CD Pipeline | ❌ | — | P1 |
-| Environment Config (dev/stage/prod) | ❌ | — | P0 |
-| Security Review | ❌ | — | P0 |
-| Deployment Runbook | ❌ | — | P2 |
-| Monitoring & Alerting Setup | ❌ | — | P2 |
-| Error Tracking | ❌ | — | P1 |
-| Analytics Plan | ❌ | — | P2 |
-| SLA Definition | ❌ | — | P2 |
-| Disaster Recovery Plan | ❌ | — | P3 |
-| Documentation (User-facing) | ❌ | — | P3 |
-| Changelog / Release Notes Process | ❌ | — | P3 |
+| Phase 0 | Discovery | 60% | ⚠️ Needs completion |
+| Phase 1 | Planning | 5% | ❌ In progress (this audit) |
+| Phase 2 | Design | 90% | ✅ Effectively done |
+| Phase 3 | Development | 0% | ❌ Blocked by Phase 1 |
+| Phase 4 | Quality | 0% | ❌ Not started |
+| Phase 5 | Release | 0% | ❌ Not started |
+| Phase 6 | Operations | 0% | ❌ Not started |
+| Phase 7 | Documentation | 5% | ❌ This audit is the start |
+| **Overall** | | **~20%** | **Pre-Development** |
 
-**P0** = Blocks engineering from starting  
-**P1** = Required before first production release  
-**P2** = Required within first month post-launch  
-**P3** = Required within first quarter post-launch
+---
+
+## 3. Sphere Method — Gap Analysis by Phase
+
+This table maps every artifact in the Sphere Method v1.0 against what exists today, what was created in this audit, and what still needs to be done.
+
+**Legend:**
+- ✅ Done — artifact exists and is usable
+- ⚠️ Draft here — first version created in this audit document, needs refinement
+- 📋 Defined here — structure defined, needs to be built/extracted into its own file
+- ❌ Missing — does not exist at all
+
+---
+
+### Phase 0 — Discovery
+
+| Artifact | Status | Where / Notes |
+|---|---|---|
+| Problem statement | ⚠️ Draft here | Section 4.2 of this document |
+| Validation evidence | ❌ Missing | Must be gathered (user interviews, surveys, or market data) |
+| Competitor analysis | ❌ Missing | Research Bonsai, HoneyBook, Dubsado, Monday, Notion, Linear |
+| Target user definition | ✅ Done | Section 5 — User Personas |
+| Scope & constraints | ✅ Done | Section 4.5 — MVP vs. Future scope |
+| Success metrics | ⚠️ Draft here | Section 15.2 — Business metrics defined |
+
+**Phase 0 Gap:** Write the Competitor Analysis. Write the Validation summary. Everything else is in this document.
+
+---
+
+### Phase 1 — Planning
+
+| Artifact | Status | Where / Notes |
+|---|---|---|
+| PRD (features, requirements, stories, scope) | ⚠️ Draft here | Sections 4–8 of this document. Extract to `docs/PRD.md`. |
+| Architecture Design | 📋 Defined here | Section 14 + Appendix C. Needs a diagram (draw.io / Excalidraw). |
+| Database Design | ⚠️ Draft here | Section 9 — Full SQL schema written. Needs ERD diagram. |
+| API Design | ⚠️ Draft here | Section 10 — Full API spec written. Needs OpenAPI YAML file. |
+| Tech Stack Decision | 📋 Defined here | Section 14.1 table. Needs a Decision Log entry explaining WHY. |
+| Environment Strategy | 📋 Defined here | Section 14.2 table. Needs `.env.example` files created in repo. |
+| Third-Party Services list | 📋 Defined here | Section 14.1 lists all services. Needs accounts created + API keys. |
+
+**Phase 1 Gap:** This audit gives you the first draft of everything. The remaining work is:
+1. Extract PRD to its own file
+2. Draw the architecture diagram
+3. Export the database schema to `schema.sql` or `schema.prisma`
+4. Export the API spec to `openapi.yaml`
+5. Write `.env.example`
+
+---
+
+### Phase 2 — Design
+
+| Artifact | Status | Where / Notes |
+|---|---|---|
+| User Flows | ❌ Not documented | Must be drawn for 5 primary flows (see below) |
+| Wireframes | ✅ Done | The prototype IS the wireframe |
+| UI Direction | ✅ Done | Design tokens defined in `index.html` `:root` |
+| Responsive Strategy | ✅ Done | Tailwind sm/md/lg breakpoints in prototype |
+| Accessibility Baseline | ⚠️ Partial | ARIA labels on icon buttons; formal audit not done |
+
+**5 User Flows to document:**
+1. New user → Sign up → Create workspace → Dashboard
+2. Create project → Assign client → Dashboard count updates
+3. Log payment → Revenue MTD updates
+4. ⌘K → Search → Navigate to result
+5. Receive notification → Open notification → Navigate to related entity
+
+**Phase 2 Gap:** User flows and a formal accessibility pass. Everything else is done.
+
+---
+
+### Phase 3 — Development
+
+| Artifact | Status | Needed Before |
+|---|---|---|
+| Git Workflow documented | ❌ Missing | First PR |
+| Branch strategy (`feature/`, `fix/`, `release/`) | ❌ Missing | First PR |
+| TDD practice established | ❌ Missing | First backend function |
+| Feature development (backend) | ❌ Missing | After Phase 1 complete |
+| Code Style Standards (`.eslintrc`, `.prettierrc`) | ❌ Missing | First file created |
+| Linting configured | ❌ Missing | First file created |
+| CI Pipeline (GitHub Actions) | ❌ Missing | First PR |
+| Secrets Management (`.env.example`, secret store) | ❌ Missing | Before any credentials exist |
+
+**Recommended tool chain (per Sphere Method):** Cursor / VS Code, Claude Code, Git, GitHub, GitHub Actions.
+
+---
+
+### Phase 4 — Quality
+
+| Artifact | Status | Needed Before |
+|---|---|---|
+| Unit Tests (Vitest / Jest / Pest / PHPUnit) | ❌ Missing | First production deployment |
+| Integration Tests | ❌ Missing | First production deployment |
+| Playwright E2E Tests | ❌ Missing | First production deployment |
+| Code Review process (PR templates, required reviewers) | ❌ Missing | First PR |
+| Security Review (OWASP Top 10 checklist) | ❌ Missing | Before public launch |
+| Performance Testing (k6 or Artillery) | ❌ Missing | Before public launch |
+| Cross-Device Testing (real devices or BrowserStack) | ❌ Missing | Before public launch |
+
+---
+
+### Phase 5 — Release
+
+| Artifact | Status | Tool (Sphere Method) |
+|---|---|---|
+| Staging environment | ❌ Missing | Vercel (preview) + Supabase (staging project) |
+| Production Deployment | ❌ Missing | Vercel + Supabase |
+| Environment Validation checklist | ❌ Missing | Manual checklist before each release |
+| Smoke Tests | ❌ Missing | Playwright (5 critical paths) |
+| Semantic Versioning (`v1.0.0`) | ❌ Missing | GitHub releases |
+| `CHANGELOG.md` | ❌ Missing | Kept in repo root |
+| Rollback Plan | ❌ Missing | Documented in `docs/DEPLOYMENT.md` |
+
+---
+
+### Phase 6 — Operations
+
+| Artifact | Status | Tool (Sphere Method) |
+|---|---|---|
+| Monitoring (APM) | ❌ Missing | Sentry |
+| Error Alerting | ❌ Missing | Sentry → Slack webhook |
+| Analytics | ❌ Missing | PostHog (product analytics) + Google Analytics (marketing) |
+| Database Backups | ❌ N/A (no DB yet) | Supabase automatic daily backups |
+| User Feedback mechanism | ❌ Missing | In-app feedback button → PostHog |
+| Data Retention Policy | ❌ Missing | Document in `docs/DATA_POLICY.md` |
+| Iteration process | ❌ Missing | Weekly review of Sentry + PostHog data |
+
+---
+
+### Phase 7 — Documentation
+
+| Artifact | Status | Tool (Sphere Method) |
+|---|---|---|
+| `README.md` | ❌ Missing | Markdown in repo root |
+| Architecture Docs | ⚠️ This document | Notion + GitHub (this file) |
+| API Docs | ⚠️ Section 10 here | Swagger UI / `openapi.yaml` |
+| Setup Guide (local dev) | ❌ Missing | `docs/SETUP.md` |
+| Decision Log | ❌ Missing | `docs/DECISIONS.md` (Architecture Decision Records) |
+
+---
+
+### Consolidated Gap Priority
+
+| Priority | Sphere Method Phase | What Must Be Done |
+|---|---|---|
+| **P0 — Do first** | Phase 0 | Write competitor analysis + validation summary |
+| **P0 — Do first** | Phase 1 | Extract PRD file, draw architecture diagram, create `.env.example` |
+| **P0 — Do first** | Phase 1 | Export database schema to `schema.prisma` or `schema.sql` |
+| **P0 — Do first** | Phase 1 | Export API spec to `openapi.yaml` |
+| **P0 — Do first** | Phase 3 | Configure ESLint, Prettier, TypeScript before writing one line of backend |
+| **P0 — Do first** | Phase 3 | Set up GitHub Actions CI pipeline |
+| **P0 — Do first** | Phase 3 | Create `.env.example` and secrets management strategy |
+| **P1 — Before launch** | Phase 2 | Document 5 user flows |
+| **P1 — Before launch** | Phase 3 | Build authentication (register/login/JWT) |
+| **P1 — Before launch** | Phase 3 | Replace all mock data with real API calls |
+| **P1 — Before launch** | Phase 4 | Write unit + integration tests for all API endpoints |
+| **P1 — Before launch** | Phase 4 | Run Playwright E2E on 5 critical flows |
+| **P1 — Before launch** | Phase 5 | Set up Vercel + Supabase staging |
+| **P1 — Before launch** | Phase 6 | Configure Sentry error tracking |
+| **P1 — Before launch** | Phase 7 | Write `README.md` and local dev setup guide |
+| **P2 — Post-launch** | Phase 6 | Configure PostHog analytics |
+| **P2 — Post-launch** | Phase 5 | Write `CHANGELOG.md` process |
+| **P2 — Post-launch** | Phase 7 | Write Architecture Decision Records |
+| **P3 — Quarter 1** | Phase 4 | Full cross-device testing matrix |
+| **P3 — Quarter 1** | Phase 0 | Gather real user validation interviews |
 
 ---
 
@@ -2211,169 +2440,270 @@ Response 200:
 
 ---
 
-## 17. SDLC Roadmap
+## 17. Sphere Method Roadmap
 
-### Phase 0 — Foundations (Weeks 1–2)
+This roadmap is structured around your **Sphere Method v1.0 phases** in the correct execution order. Notice that Phase 0 and Phase 1 come before Phase 3 (Development) — you cannot build what you have not yet designed on paper.
 
-**Goal:** Set up everything that blocks engineering from starting.
+---
 
-| Task | Priority |
+### Sphere Method Phase 0 — Discovery (Week 1)
+
+**Goal:** Determine whether the idea is worth building.
+**Your status:** 60% done. Finish it this week.
+
+| Task | Output File | Effort |
+|---|---|---|
+| Write one-page Problem Statement | `docs/DISCOVERY.md` | 1 hour |
+| List 5 direct competitors (Bonsai, HoneyBook, Dubsado, Monday, Linear) with pros/cons | `docs/DISCOVERY.md` | 3 hours |
+| Define success metrics (what does "success in 6 months" look like numerically?) | `docs/DISCOVERY.md` | 1 hour |
+| Interview 3–5 potential users (freelancers, agency owners) — even informally | Notes in `docs/DISCOVERY.md` | 2–3 hours |
+
+**Tools (per Sphere Method):** ChatGPT, Claude for competitor research synthesis.
+
+**Deliverable:** `docs/DISCOVERY.md` — a single page that captures the problem, who has it, why existing tools fail, who the target user is, what constraints exist, and what success looks like in numbers.
+
+---
+
+### Sphere Method Phase 1 — Planning (Weeks 1–2)
+
+**Goal:** Create the blueprint before coding.
+**Your status:** This audit is the raw material. Now extract it into proper files.
+
+| Task | Output File | Source in This Audit |
+|---|---|---|
+| Extract PRD from this audit | `docs/PRD.md` | Sections 4, 5, 6, 7, 8 |
+| Draw system architecture diagram | `docs/architecture.png` + `docs/ARCHITECTURE.md` | Section 14 + Appendix C |
+| Export database schema | `database/schema.sql` or `prisma/schema.prisma` | Section 9 |
+| Export API spec to OpenAPI format | `docs/openapi.yaml` | Section 10 |
+| Document tech stack decision with rationale | `docs/DECISIONS.md` | Section 14.1 |
+| Create `.env.example` with all required variables | `.env.example` | Section 14.3 |
+| List all third-party services + account setup tasks | `docs/DECISIONS.md` | Section 14.1 |
+| Document Git branching strategy | `docs/CONTRIBUTING.md` | — |
+
+**Tools (per Sphere Method):** Claude, ChatGPT, Figma (for architecture diagram).
+
+**Deliverable:** A complete `docs/` folder with PRD, architecture diagram, database schema, API spec, and decision log. Any engineer can read these files and know exactly what to build.
+
+---
+
+### Sphere Method Phase 2 — Design (Week 2)
+
+**Goal:** Design user experience.
+**Your status:** 90% done. Finish the gaps.
+
+| Task | Output | Effort |
+|---|---|---|
+| Document 5 primary user flows as numbered step lists | `docs/USER_FLOWS.md` | 2 hours |
+| Run keyboard navigation test on prototype | Notes in `docs/USER_FLOWS.md` | 1 hour |
+| Run ARIA audit (browser DevTools → Accessibility panel) | Notes + fixes in `index.html` | 2 hours |
+
+**Tools (per Sphere Method):** Figma, Excalidraw, or pen & paper for user flow diagrams.
+
+**Deliverable:** `docs/USER_FLOWS.md` with 5 flows documented. Prototype passes basic keyboard navigation.
+
+---
+
+### Sphere Method Phase 3 — Development (Weeks 3–10)
+
+**Goal:** Build the actual system.
+**Your status:** 0% — cannot start until Phases 0 and 1 are complete.
+
+#### Sprint 3.1 — Dev Environment Setup (Week 3)
+
+| Task | Tool |
 |---|---|
-| Write formal PRD (this document) | P0 |
-| Choose and document tech stack | P0 |
-| Set up monorepo structure (frontend + API) | P0 |
-| Configure ESLint, Prettier, TypeScript | P0 |
-| Set up development database (Supabase local or Docker) | P0 |
-| Write and apply initial database migrations | P0 |
-| Set up GitHub Actions CI (lint + test pipeline) | P0 |
-| Configure development environment (`.env` files) | P0 |
+| Initialize monorepo (Turborepo or pnpm workspaces) | pnpm / npm |
+| Create `apps/web` (Next.js 14 App Router) | npx create-next-app |
+| Create `apps/api` (Fastify or Express + TypeScript) | npm |
+| Configure ESLint + Prettier + TypeScript strict mode | `.eslintrc.js`, `.prettierrc` |
+| Set up Husky pre-commit hooks (lint + type-check) | husky |
+| Set up GitHub Actions CI (lint → test → build) | `.github/workflows/ci.yml` |
+| Initialize Prisma + connect to Supabase local DB | `prisma/schema.prisma` |
+| Apply database migrations from schema | `prisma migrate dev` |
+| Create `.env.example` and team `.env.local` setup | `.env.example` |
 
-**Deliverable:** Engineers can clone repo, run `npm install && npm run dev`, and see a working local environment with a real database.
+**Deliverable:** `git clone → npm install → npm run dev` produces a running local environment with real database. CI passes on first PR.
 
----
+#### Sprint 3.2 — Authentication & Workspace (Week 4)
 
-### Phase 1 — Authentication & Workspace (Weeks 3–4)
-
-**Goal:** Real users can sign up, log in, and have a workspace.
-
-| Task | Story | Priority |
-|---|---|---|
-| User registration API | US-001 | P0 |
-| Email verification | US-001 | P0 |
-| User login + JWT | US-002 | P0 |
-| Refresh token rotation | US-002 | P0 |
-| Password reset | US-003 | P0 |
-| Workspace creation on register | US-006 | P0 |
-| Auth middleware for all protected routes | — | P0 |
-| Frontend: Login page | US-002 | P0 |
-| Frontend: Register page | US-001 | P0 |
-| Frontend: Redirect to dashboard after auth | US-002 | P0 |
-
-**Deliverable:** User can sign up with email, verify email, log in, and see the dashboard (still with mock data at this stage).
-
----
-
-### Phase 2 — Core Data Layer (Weeks 5–7)
-
-**Goal:** Replace all mock data with real data from the database.
-
-| Task | Story | Priority |
-|---|---|---|
-| Clients CRUD API | US-030–034 | P0 |
-| Projects CRUD API | US-020–027 | P0 |
-| Tasks CRUD API | US-040–046 | P0 |
-| Dashboard metrics API (single endpoint) | US-010–018 | P0 |
-| Activity log (auto-generated on mutations) | US-070 | P0 |
-| Frontend: API client setup (fetch/axios + auth headers) | — | P0 |
-| Frontend: Replace mock data with API calls | — | P0 |
-| Frontend: Loading skeletons for all async sections | — | P0 |
-| Frontend: Error states for all sections | — | P0 |
-| Frontend: Empty states for all list sections | — | P0 |
-| Integration tests for all new endpoints | — | P1 |
-
-**Deliverable:** All dashboard data is real. A user who logs in sees their actual projects, clients, and tasks.
-
----
-
-### Phase 3 — Revenue & Time Tracking (Weeks 8–9)
-
-**Goal:** Revenue MTD and Hours Logged show real numbers.
-
-| Task | Story | Priority |
-|---|---|---|
-| Invoices CRUD API | US-054–055 | P0 |
-| Payments API | US-050–053 | P0 |
-| Revenue MTD calculation | US-010–011 | P0 |
-| Revenue chart data API | US-016–018 | P0 |
-| Time entries CRUD API | US-060–064 | P0 |
-| Hours logged calculation | US-061 | P0 |
-| Frontend: Revenue chart connected to real data | US-016 | P0 |
-| Frontend: Add time entry flow | US-060 | P1 |
-| Frontend: Log payment flow | US-050 | P1 |
-
-**Deliverable:** Revenue MTD and Hours Logged reflect real user input.
-
----
-
-### Phase 4 — Search & Notifications (Weeks 10–11)
-
-**Goal:** Search works across real data. Notifications are real-time.
-
-| Task | Story | Priority |
-|---|---|---|
-| Search API (PostgreSQL FTS) | US-080–083 | P0 |
-| Frontend: Search results rendering | US-081 | P0 |
-| Notifications API | US-071–074 | P0 |
-| Notification bell badge (unread count) | US-074 | P0 |
-| Real-time delivery (SSE or WebSocket) | US-071 | P1 |
-| Mark notifications as read | US-073 | P1 |
-
----
-
-### Phase 5 — Team Management (Weeks 12–13)
-
-**Goal:** Invite team members, enforce role-based permissions.
-
-| Task | Story | Priority |
-|---|---|---|
-| Invite member API | US-004 | P1 |
-| Accept invitation flow | US-005 | P1 |
-| Role-based permission middleware | — | P0 |
-| Member management UI | US-004 | P1 |
-| Frontend: Permission-aware rendering (hide buttons based on role) | — | P1 |
-
----
-
-### Phase 6 — Production Hardening (Weeks 14–15)
-
-**Goal:** Ready for first paying customers.
-
-| Task | Priority |
-|---|---|
-| Replace Tailwind CDN with Tailwind CLI build | P0 |
-| Componentize frontend into proper framework (Next.js) | P0 |
-| Rate limiting (express-rate-limit or nginx) | P0 |
-| Security headers (Helmet.js or equivalent) | P0 |
-| OWASP Top 10 review | P0 |
-| E2E tests (Playwright) for 5 critical journeys | P1 |
-| Uptime monitoring (Better Uptime) | P1 |
-| Error tracking (Sentry) | P1 |
-| Performance testing (k6) | P1 |
-| Database index optimization | P1 |
-| Privacy Policy + Terms of Service | P0 |
-| GDPR data deletion endpoint | P1 |
-
----
-
-### Phase 7 — Soft Launch (Week 16)
-
-**Goal:** First 10 beta customers using the product.
+Stories: US-001 through US-006
 
 | Task |
 |---|
-| Deploy to production (Vercel + Railway/Fly.io) |
-| Custom domain (legacyasphere.com) |
-| SSL certificate |
-| Billing integration (Stripe) |
-| Onboarding email sequence |
-| In-app onboarding checklist (new user) |
-| Feature flag system for gradual rollout |
-| Feedback collection mechanism |
+| POST /auth/register — create user + workspace |
+| POST /auth/login — return JWT + refresh token |
+| POST /auth/refresh — rotate tokens |
+| POST /auth/logout — revoke refresh token |
+| POST /auth/forgot-password + /reset-password |
+| Auth middleware — validate JWT on all protected routes |
+| Workspace isolation middleware — scope all queries to `workspace_id` |
+| Frontend: `/login` page |
+| Frontend: `/register` page |
+| Frontend: Auth state management (context/store) |
+| Frontend: Redirect unauthenticated users to `/login` |
+
+**Deliverable:** Real login works. Dashboard requires authentication. All API routes reject requests without valid JWT.
+
+#### Sprint 3.3 — Core Data Layer (Weeks 5–7)
+
+Stories: US-010–046, US-070
+
+| Task |
+|---|
+| Clients CRUD (GET, POST, PATCH, DELETE) |
+| Projects CRUD + status transitions |
+| Tasks CRUD + reorder endpoint |
+| Dashboard metrics endpoint (single API call for all 4 KPIs) |
+| Activity log — auto-generated on every mutation |
+| Frontend: Replace ALL hardcoded mock data with API calls |
+| Frontend: Loading skeletons for every async section |
+| Frontend: Error states for every section |
+| Frontend: Empty states for every list |
+| Integration tests for every endpoint (happy path + error paths) |
+
+**Deliverable:** Dashboard shows real data. No hardcoded values remain. Empty state looks good for new workspaces.
+
+#### Sprint 3.4 — Revenue & Time Tracking (Weeks 8–9)
+
+Stories: US-050–064
+
+| Task |
+|---|
+| Invoices CRUD |
+| Payments API + Revenue MTD aggregation |
+| Revenue chart data API (7D/30D/90D) |
+| Time entries CRUD |
+| Hours Logged aggregation (current week vs. previous) |
+| Frontend: Revenue chart pulls real data |
+| Frontend: Log payment modal (replaces hardcoded `$24,580`) |
+| Frontend: Log time entry flow |
+
+**Deliverable:** Revenue MTD and Hours Logged show real user-entered data.
+
+#### Sprint 3.5 — Search & Notifications (Weeks 9–10)
+
+Stories: US-070–083
+
+| Task |
+|---|
+| Search API (PostgreSQL FTS across projects, clients, tasks) |
+| Notifications API + unread count |
+| Real-time delivery (Supabase Realtime or SSE) |
+| Frontend: Search modal shows real results |
+| Frontend: Notification bell shows real unread count |
+| Frontend: Mark as read |
+
+**Deliverable:** ⌘K search returns real results. Notification bell reflects real system events.
 
 ---
 
-### Milestone Summary
+### Sphere Method Phase 4 — Quality (Weeks 11–12)
 
-| Milestone | Target | Deliverable |
+**Goal:** Ensure the product works.
+
+| Task | Tool |
+|---|---|
+| Unit tests for all business logic (revenue calc, permissions, date utils) | Vitest / Jest |
+| Integration tests for all 40+ API endpoints | Supertest |
+| Playwright E2E for 5 critical user flows | Playwright |
+| Code review — PR template with checklist | GitHub PR template |
+| OWASP Top 10 security review checklist | Manual + CodeQL |
+| npm audit / Snyk dependency scan | npm audit |
+| Load testing — 500 concurrent users | k6 |
+| Cross-device testing (mobile Safari, Android Chrome, desktop) | BrowserStack or real devices |
+| Fix all P0 and P1 findings before proceeding | — |
+
+**Tools (per Sphere Method):** PHPUnit / Pest (PHP) or Vitest (Node), Playwright, GitHub PRs.
+
+**Deliverable:** CI pipeline green. Test coverage ≥ 70%. No critical security findings. Loads cleanly on mobile Safari.
+
+---
+
+### Sphere Method Phase 5 — Release (Weeks 13–14)
+
+**Goal:** Ship safely.
+
+| Task | Tool |
+|---|---|
+| Deploy to Vercel staging environment (preview URL) | Vercel |
+| Deploy Supabase staging project | Supabase |
+| Run database migrations on staging | `prisma migrate deploy` |
+| Environment validation checklist | Manual |
+| Run Playwright smoke tests against staging URL | Playwright |
+| Tag first release `v1.0.0-beta.1` | GitHub Releases |
+| Write `CHANGELOG.md` with all features | `CHANGELOG.md` |
+| Document rollback plan | `docs/DEPLOYMENT.md` |
+| Production deployment (Vercel + Supabase) | Vercel |
+| Custom domain + SSL | Vercel |
+| Final smoke tests on production | Playwright |
+
+**Tools (per Sphere Method):** GitHub, Vercel, Supabase.
+
+**Deliverable:** Live production URL. Real users can sign up and use the product.
+
+---
+
+### Sphere Method Phase 6 — Operations (Week 15 onward)
+
+**Goal:** Keep the product healthy.
+
+| Task | Tool | When |
 |---|---|---|
-| M0: Foundations | Week 2 | Dev environment running, database seeded |
-| M1: Auth | Week 4 | Login/Register/Workspace working |
-| M2: Real Data | Week 7 | All mock data replaced with database |
-| M3: Revenue & Time | Week 9 | Financial metrics are real |
-| M4: Search + Notifs | Week 11 | Full feature set complete |
-| M5: Team Mgmt | Week 13 | Multi-user workspaces work |
-| M6: Production | Week 15 | Security hardened, tests passing |
-| M7: Launch | Week 16 | First beta users |
+| Configure Sentry (error tracking + performance) | Sentry | Before launch |
+| Set up Sentry → Slack alert webhook | Sentry | Before launch |
+| Configure PostHog (product analytics) | PostHog | Week 1 post-launch |
+| Verify Supabase automatic daily backups are on | Supabase | Before launch |
+| Add in-app feedback button | PostHog survey widget | Week 2 post-launch |
+| Schedule weekly metrics review (Sentry + PostHog) | Calendar | Week 1 post-launch |
+| Write Data Retention Policy | `docs/DATA_POLICY.md` | Before launch |
+| Set up iteration process (feedback → issue → sprint) | GitHub Issues | Week 2 post-launch |
+
+**Tools (per Sphere Method):** Sentry, PostHog, Google Analytics, Supabase Backups.
+
+**Deliverable:** Error rate visible in Sentry. Feature usage visible in PostHog. Backups confirmed running.
+
+---
+
+### Sphere Method Phase 7 — Documentation (Week 14–15, in parallel with Release)
+
+**Goal:** Preserve knowledge.
+
+| Document | File | Owner | When |
+|---|---|---|---|
+| README | `README.md` | You | Before Phase 5 |
+| Architecture Docs | `docs/ARCHITECTURE.md` | You | Before Phase 3 |
+| API Docs (Swagger UI) | `docs/openapi.yaml` | You | Before Phase 4 |
+| Local Setup Guide | `docs/SETUP.md` | You | Before Phase 3 |
+| Decision Log (ADRs) | `docs/DECISIONS.md` | You | As decisions are made |
+
+**`README.md` minimum contents:**
+1. What is LegacyaSphere? (1 paragraph)
+2. Tech stack (list)
+3. Local setup (5 commands)
+4. Environment variables reference (link to `.env.example`)
+5. How to run tests
+6. Deployment instructions (link to `docs/DEPLOYMENT.md`)
+
+**Tools (per Sphere Method):** Notion (for personal notes), Markdown + GitHub (for repo docs), Swagger UI (for API docs).
+
+---
+
+### Milestone Summary (Sphere Method Aligned)
+
+| Sphere Phase | Milestone | Target Week | Deliverable |
+|---|---|---|---|
+| Phase 0 | Discovery complete | Week 1 | `docs/DISCOVERY.md` exists, competitors documented |
+| Phase 1 | Planning complete | Week 2 | PRD, schema, API spec, arch diagram all in `docs/` |
+| Phase 2 | Design finalized | Week 2 | User flows documented, accessibility pass done |
+| Phase 3.1 | Dev environment | Week 3 | Clone → dev works, CI passes, DB running |
+| Phase 3.2 | Auth working | Week 4 | Real login/register, JWT, workspace scoping |
+| Phase 3.3 | Real data | Week 7 | All mock data gone, dashboard shows DB data |
+| Phase 3.4 | Revenue & Time | Week 9 | Revenue MTD and Hours Logged are real |
+| Phase 3.5 | Search & Notifs | Week 10 | ⌘K works, notifications are real |
+| Phase 4 | Quality pass | Week 12 | Tests passing, security review done |
+| Phase 5 | Launched | Week 14 | Live on production, real users can sign up |
+| Phase 6 | Ops running | Week 15 | Sentry live, PostHog live, backups confirmed |
+| Phase 7 | Docs complete | Week 15 | README, API docs, setup guide all exist |
 
 ---
 
