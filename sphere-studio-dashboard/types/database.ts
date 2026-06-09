@@ -308,6 +308,10 @@ export interface Database {
         Args: { p_workspace_id: string }
         Returns: WorkspaceRole
       }
+      create_workspace_for_user: {
+        Args: { p_name: string; p_slug: string }
+        Returns: string
+      }
     }
     Enums: {
       workspace_role: WorkspaceRole
