@@ -1,30 +1,51 @@
-import { CheckSquare } from 'lucide-react'
+import Link from 'next/link'
+import { Plus } from 'lucide-react'
+import { notFound } from 'next/navigation'
+import { createClient } from '@/lib/supabase/server'
 import { PageHeader } from '@/components/layout/page-header'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
+import { TaskList } from '@/components/domain/tasks/task-list'
 
-export default function TasksPage() {
+export default async function TasksPage() {
+  const supabase = createClient()
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return notFound()
+
+  const { data: memberships } = await supabase
+    .from('workspace_members')
+    .select('workspace_id')
+    .eq('user_id', user.id)
+    .limit(1)
+
+  const workspaceId = (memberships?.[0] as { workspace_id: string } | undefined)?.workspace_id
+  if (!workspaceId) return notFound()
+
+  const { data: projectRows } = await supabase
+    .from('projects')
+    .select('id, name')
+    .eq('workspace_id', workspaceId)
+    .order('name', { ascending: true })
+
+  const projects = (projectRows ?? []) as { id: string; name: string }[]
+
   return (
     <div className="space-y-6">
       <PageHeader
-        title="My Tasks"
-        description="All tasks assigned to you across projects."
+        title="Tasks"
+        description="Manage all tasks across your workspace projects."
         actions={
-          <Button disabled>
-            <CheckSquare className="mr-2 h-4 w-4" />
-            Add Task
+          <Button asChild>
+            <Link href="/tasks/new">
+              <Plus className="mr-2 h-4 w-4" />
+              New Task
+            </Link>
           </Button>
         }
       />
-      <Card>
-        <CardContent className="flex flex-col items-center justify-center py-16 text-center">
-          <CheckSquare className="mb-4 h-12 w-12 text-muted-foreground/40" />
-          <h3 className="text-base font-medium">Tasks — coming soon</h3>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Task CRUD will be implemented after Projects.
-          </p>
-        </CardContent>
-      </Card>
+      <TaskList projects={projects} />
     </div>
   )
 }
