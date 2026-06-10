@@ -105,24 +105,34 @@ export function TaskForm({
         <Label htmlFor="project_id">
           Project <span className="text-destructive">*</span>
         </Label>
-        <Controller
-          name="project_id"
-          control={control}
-          render={({ field }) => (
-            <Select value={field.value ?? ''} onValueChange={field.onChange}>
-              <SelectTrigger id="project_id">
-                <SelectValue placeholder="Select a project" />
-              </SelectTrigger>
-              <SelectContent>
-                {projects.map((p) => (
-                  <SelectItem key={p.id} value={p.id}>
-                    {p.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
-        />
+        {projects.length === 0 ? (
+          <p className="rounded-md border border-dashed px-3 py-2 text-sm text-muted-foreground">
+            No projects yet.{' '}
+            <a href="/projects/new" className="underline hover:text-foreground">
+              Create a project first
+            </a>{' '}
+            before adding tasks.
+          </p>
+        ) : (
+          <Controller
+            name="project_id"
+            control={control}
+            render={({ field }) => (
+              <Select value={field.value ?? ''} onValueChange={field.onChange}>
+                <SelectTrigger id="project_id">
+                  <SelectValue placeholder="Select a project" />
+                </SelectTrigger>
+                <SelectContent>
+                  {projects.map((p) => (
+                    <SelectItem key={p.id} value={p.id}>
+                      {p.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+          />
+        )}
         {errors.project_id && (
           <p className="text-sm text-destructive">{errors.project_id.message}</p>
         )}

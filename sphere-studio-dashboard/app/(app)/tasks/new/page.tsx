@@ -13,15 +13,14 @@ import { useProjects } from '@/hooks/use-projects'
 
 export default function NewTaskPage() {
   const router = useRouter()
-  const { workspaceId, userId } = useWorkspace()
+  const { workspaceId, userId, userEmail, userFullName } = useWorkspace()
   const [serverError, setServerError] = useState<string | null>(null)
 
   const { mutate: createTask, isPending } = useCreateTask(workspaceId, userId)
   const { data: projectsPage } = useProjects(workspaceId)
 
   const projects = (projectsPage?.data ?? []).map((p) => ({ id: p.id, name: p.name }))
-  // Solo-freelancer ICP: workspace members = just the owner; pass current user as only member
-  const members = [{ id: userId, full_name: null, email: '' }]
+  const members = [{ id: userId, full_name: userFullName, email: userEmail }]
 
   function handleSubmit(data: Parameters<typeof createTask>[0]) {
     setServerError(null)

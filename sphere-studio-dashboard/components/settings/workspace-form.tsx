@@ -51,18 +51,18 @@ export function WorkspaceForm({
     })
   }
 
-  function handleNameChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const name = e.target.value
-    setValue('name', name, { shouldDirty: true })
-    // Auto-derive slug from name only when slug hasn't been manually edited
-    const autoSlug = name
-      .toLowerCase()
-      .replace(/[^a-z0-9\s-]/g, '')
-      .replace(/\s+/g, '-')
-      .replace(/-+/g, '-')
-      .slice(0, 50)
-    setValue('slug', autoSlug, { shouldDirty: true })
-  }
+  const nameRegistration = register('name', {
+    onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
+      const name = e.target.value
+      const autoSlug = name
+        .toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, '')
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-')
+        .slice(0, 50)
+      setValue('slug', autoSlug, { shouldDirty: true })
+    },
+  })
 
   return (
     <Card>
@@ -76,8 +76,7 @@ export function WorkspaceForm({
             <Label htmlFor="ws-name">Workspace name</Label>
             <Input
               id="ws-name"
-              {...register('name')}
-              onChange={handleNameChange}
+              {...nameRegistration}
               className="max-w-sm"
             />
             {errors.name && (

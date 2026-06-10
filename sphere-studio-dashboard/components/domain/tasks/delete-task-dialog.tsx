@@ -30,7 +30,7 @@ export function DeleteTaskDialog({
   const { mutate: deleteTask, isPending } = useDeleteTask(workspaceId)
 
   function handleConfirm() {
-    deleteTask(taskId, { onError: () => onOpenChange(false) })
+    deleteTask(taskId, { onSettled: () => onOpenChange(false) })
   }
 
   return (

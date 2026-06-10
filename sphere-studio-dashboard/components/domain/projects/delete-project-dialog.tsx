@@ -30,7 +30,7 @@ export function DeleteProjectDialog({
   const { mutate: deleteProject, isPending } = useDeleteProject(workspaceId)
 
   function handleConfirm() {
-    deleteProject(projectId, { onError: () => onOpenChange(false) })
+    deleteProject(projectId, { onSettled: () => onOpenChange(false) })
   }
 
   return (
