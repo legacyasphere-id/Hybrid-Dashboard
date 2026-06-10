@@ -4,13 +4,19 @@ import { AppShell } from '@/components/layout/app-shell'
 import { WorkspaceProvider } from '@/lib/workspace-context'
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
-  const supabase = createClient()
+  let supabase: ReturnType<typeof createClient>
+  try {
+    supabase = createClient()
+  } catch {
+    redirect('/login')
+  }
 
   const {
     data: { user },
+    error: userError,
   } = await supabase.auth.getUser()
 
-  if (!user) redirect('/login')
+  if (userError || !user) redirect('/login')
 
   const [{ data: memberships }, { data: profile }] = await Promise.all([
     supabase
