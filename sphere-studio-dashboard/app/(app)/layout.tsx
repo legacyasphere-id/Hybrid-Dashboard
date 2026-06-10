@@ -4,13 +4,23 @@ import { AppShell } from '@/components/layout/app-shell'
 import { WorkspaceProvider } from '@/lib/workspace-context'
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    redirect('/login')
+  }
+
+  let user: Awaited<ReturnType<ReturnType<typeof createClient>['auth']['getUser']>>['data']['user']
+
+  try {
+    const supabase = createClient()
+    const { data, error } = await supabase.auth.getUser()
+    if (error || !data.user) redirect('/login')
+    user = data.user
+  } catch (err) {
+    console.error('[AppLayout] auth error:', err)
+    redirect('/login')
+  }
+
   const supabase = createClient()
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) redirect('/login')
 
   const [{ data: memberships }, { data: profile }] = await Promise.all([
     supabase
@@ -36,18 +46,18 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const ws = workspace as { id: string; name: string; slug: string; plan: string }
   const fullName = (profile as { full_name: string | null } | null)?.full_name ?? null
 
-  const contextValue = {
-    workspaceId: ws.id,
-    workspaceName: ws.name,
-    workspacePlan: ws.plan,
-    userId: user.id,
-    userEmail: user.email ?? '',
-    userFullName: fullName,
-    role: membership.role,
-  }
-
   return (
-    <WorkspaceProvider value={contextValue}>
+    <WorkspaceProvider
+      value={{
+        workspaceId: ws.id,
+        workspaceName: ws.name,
+        workspacePlan: ws.plan,
+        userId: user.id,
+        userEmail: user.email ?? '',
+        userFullName: fullName,
+        role: membership.role,
+      }}
+    >
       <AppShell
         user={{ id: user.id, email: user.email ?? '', fullName }}
         workspace={ws}
