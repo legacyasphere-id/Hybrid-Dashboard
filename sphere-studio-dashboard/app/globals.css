@@ -2,94 +2,180 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer base {
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 240 10% 3.9%;
+/* ─────────────────────────────────────────────────────────────
+   DESIGN TOKENS — original Hybrid Dashboard token system.
+   shadcn/ui component tokens are mapped below so existing
+   components continue to render without modification.
+───────────────────────────────────────────────────────────── */
+:root {
+  /* Brand */
+  --hs-accent:          #4f46e5;
+  --hs-accent-hover:    #4338ca;
+  --hs-accent-light:    #eef2ff;
+  --hs-accent-muted:    rgba(79, 70, 229, 0.12);
 
-    --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
+  /* Semantic */
+  --hs-success:         #10b981;
+  --hs-success-light:   #ecfdf5;
+  --hs-warning:         #f59e0b;
+  --hs-warning-light:   #fffbeb;
+  --hs-danger:          #f43f5e;
+  --hs-danger-light:    #fff1f2;
+  --hs-revision:        #f97316;
+  --hs-revision-light:  #fff7ed;
+  --hs-violet:          #8b5cf6;
+  --hs-violet-light:    #f5f3ff;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
+  /* Neutral scale */
+  --hs-neutral-900:     #171717;
+  --hs-neutral-800:     #262626;
+  --hs-neutral-700:     #404040;
+  --hs-neutral-600:     #525252;
+  --hs-neutral-500:     #737373;
+  --hs-neutral-400:     #a3a3a3;
+  --hs-neutral-300:     #d4d4d4;
+  --hs-neutral-200:     #e5e5e5;
+  --hs-neutral-100:     #f5f5f5;
+  --hs-neutral-50:      #fafafa;
+  --hs-white:           #ffffff;
 
-    --primary: 243 75% 59%;
-    --primary-foreground: 0 0% 100%;
+  /* Sidebar */
+  --hs-sidebar-bg:      #111111;
+  --hs-sidebar-border:  rgba(255, 255, 255, 0.06);
+  --hs-sidebar-hover:   rgba(255, 255, 255, 0.05);
+  --hs-sidebar-active:  rgba(255, 255, 255, 0.10);
+  --hs-sidebar-text:    #a3a3a3;
+  --hs-sidebar-text-active: #ffffff;
 
-    --secondary: 240 4.8% 95.9%;
-    --secondary-foreground: 240 5.9% 10%;
+  /* Radius */
+  --hs-radius-sm:       6px;
+  --hs-radius-md:       10px;
+  --hs-radius-lg:       14px;
+  --hs-radius-xl:       18px;
 
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
+  /* Shadows */
+  --hs-shadow-card:     0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --hs-shadow-hover:    0 4px 12px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.06);
+  --hs-shadow-modal:    0 20px 60px rgba(0,0,0,0.18), 0 4px 16px rgba(0,0,0,0.10);
 
-    --accent: 240 4.8% 95.9%;
-    --accent-foreground: 240 5.9% 10%;
+  /* ── shadcn/ui token mapping ──────────────────────────────
+     These keep existing shadcn components (Button, Dialog, etc.)
+     visually consistent with the new design system.
+  ────────────────────────────────────────────────────────── */
+  --background:         0 0% 98%;        /* --hs-neutral-50 */
+  --foreground:         0 0% 9%;         /* --hs-neutral-900 */
 
-    --destructive: 350 89% 60%;
-    --destructive-foreground: 0 0% 100%;
+  --card:               0 0% 100%;
+  --card-foreground:    0 0% 9%;
 
-    --success: 160 84% 39%;
-    --success-foreground: 0 0% 100%;
+  --popover:            0 0% 100%;
+  --popover-foreground: 0 0% 9%;
 
-    --warning: 38 92% 50%;
-    --warning-foreground: 0 0% 100%;
+  --primary:            243 75% 59%;     /* --hs-accent */
+  --primary-foreground: 0 0% 100%;
 
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
-    --ring: 243 75% 59%;
+  --secondary:          0 0% 96%;
+  --secondary-foreground: 0 0% 25%;
 
-    --radius: 0.5rem;
-  }
+  --muted:              0 0% 96%;
+  --muted-foreground:   0 0% 45%;
 
-  .dark {
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
+  --accent:             0 0% 96%;
+  --accent-foreground:  0 0% 9%;
 
-    --card: 240 10% 7%;
-    --card-foreground: 0 0% 98%;
+  --destructive:        350 89% 60%;     /* --hs-danger */
+  --destructive-foreground: 0 0% 100%;
 
-    --popover: 240 10% 7%;
-    --popover-foreground: 0 0% 98%;
+  --success:            160 84% 39%;     /* --hs-success */
+  --success-foreground: 0 0% 100%;
 
-    --primary: 243 75% 65%;
-    --primary-foreground: 0 0% 100%;
+  --warning:            38 92% 50%;      /* --hs-warning */
+  --warning-foreground: 0 0% 100%;
 
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
+  --border:             0 0% 90%;
+  --input:              0 0% 90%;
+  --ring:               243 75% 59%;
 
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
-
-    --accent: 240 3.7% 15.9%;
-    --accent-foreground: 0 0% 98%;
-
-    --destructive: 350 89% 65%;
-    --destructive-foreground: 0 0% 100%;
-
-    --success: 160 84% 45%;
-    --success-foreground: 0 0% 100%;
-
-    --warning: 38 92% 55%;
-    --warning-foreground: 0 0% 100%;
-
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 243 75% 65%;
-  }
+  --radius:             0.625rem;        /* --hs-radius-md ≈ 10px */
 }
 
+/* ── Base resets ─────────────────────────────────────────── */
 @layer base {
   * {
     @apply border-border;
   }
-  body {
-    @apply bg-background text-foreground;
-    font-feature-settings: "rlig" 1, "calt" 1;
+
+  html, body {
+    font-family: var(--font-inter), 'Inter', system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    background: var(--hs-neutral-50);
+    color: var(--hs-neutral-900);
   }
 }
 
+/* ── Utility classes matching original design ────────────── */
 @layer utilities {
-  .text-balance {
-    text-wrap: balance;
+  .text-balance { text-wrap: balance; }
+  .tabular      { font-variant-numeric: tabular-nums; }
+
+  /* Activity feed vertical line */
+  .activity-list          { position: relative; }
+  .activity-list::before  {
+    content: '';
+    position: absolute;
+    left: 6px;
+    top: 8px;
+    bottom: 8px;
+    width: 1px;
+    background: var(--hs-neutral-200);
   }
+
+  /* Metric card hover-reveal "View →" */
+  .metric-card .view-link {
+    opacity: 0;
+    transform: translateX(-4px);
+    transition: opacity .2s ease, transform .2s ease;
+  }
+  .metric-card:hover .view-link {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  /* Sidebar nav item hover */
+  .nav-item-dark {
+    transition: background 0.15s ease, color 0.15s ease;
+    color: var(--hs-sidebar-text);
+  }
+  .nav-item-dark:hover {
+    background: var(--hs-sidebar-hover) !important;
+    color: white !important;
+  }
+
+  /* Task row hover */
+  .task-row { transition: background 0.15s ease; }
+  .task-row:hover { background: var(--hs-neutral-50) !important; }
+
+  /* Project list row hover */
+  .project-row { transition: background 0.15s ease; }
+  .project-row:hover { background: var(--hs-neutral-50) !important; }
+
+  /* Metric card hover lift */
+  .metric-card { transition: box-shadow 0.15s ease, border-color 0.15s ease; }
+  .metric-card:hover {
+    box-shadow: var(--hs-shadow-hover) !important;
+    border-color: var(--hs-neutral-300) !important;
+  }
+
+  /* Modal entry animation */
+  .modal-enter {
+    animation: modalIn 0.18s ease-out;
+  }
+  @keyframes modalIn {
+    from { opacity: 0; transform: translateY(8px) scale(.98); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  /* Task done state */
+  .task-done .task-text    { text-decoration: line-through; color: var(--hs-neutral-400); }
+  .task-done .priority-dot { opacity: .35; }
 }

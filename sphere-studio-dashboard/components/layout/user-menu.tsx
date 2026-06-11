@@ -1,8 +1,8 @@
 'use client'
 
 import { useTransition } from 'react'
-import { LogOut, User } from 'lucide-react'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { LogOut, Settings } from 'lucide-react'
+import Link from 'next/link'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -31,6 +31,7 @@ function getInitials(email: string, fullName: string | null): string {
 
 export function UserMenu({ email, fullName, role }: UserMenuProps) {
   const [isPending, startTransition] = useTransition()
+  const initials = getInitials(email, fullName)
 
   function handleSignOut() {
     startTransition(async () => {
@@ -41,13 +42,20 @@ export function UserMenu({ email, fullName, role }: UserMenuProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button className="flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-left transition-colors hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-          <Avatar className="h-7 w-7 shrink-0">
-            <AvatarFallback className="text-xs">{getInitials(email, fullName)}</AvatarFallback>
-          </Avatar>
+        <button
+          className="flex w-full items-center gap-2.5 px-3 py-2 rounded-[10px] text-left transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#4f46e5] focus-visible:ring-offset-2 focus-visible:ring-offset-[#111111]"
+          onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)' }}
+          onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
+        >
+          <div
+            className="w-7 h-7 shrink-0 rounded-full flex items-center justify-center text-white text-[11px] font-semibold"
+            style={{ background: 'linear-gradient(135deg, #404040, #171717)' }}
+          >
+            {initials}
+          </div>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-medium">{fullName ?? email}</p>
-            <p className="truncate text-xs capitalize text-muted-foreground">{role}</p>
+            <p className="truncate text-[13px] font-medium text-white">{fullName ?? email}</p>
+            <p className="truncate text-[11px] capitalize" style={{ color: '#737373' }}>{role}</p>
           </div>
         </button>
       </DropdownMenuTrigger>
@@ -59,12 +67,18 @@ export function UserMenu({ email, fullName, role }: UserMenuProps) {
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem disabled>
-          <User className="mr-2 h-4 w-4" />
-          Profile
+        <DropdownMenuItem asChild>
+          <Link href="/settings/profile" className="flex items-center gap-2 cursor-pointer">
+            <Settings className="h-4 w-4" />
+            Settings
+          </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handleSignOut} disabled={isPending} className="text-destructive focus:text-destructive">
+        <DropdownMenuItem
+          onClick={handleSignOut}
+          disabled={isPending}
+          className="text-destructive focus:text-destructive cursor-pointer"
+        >
           <LogOut className="mr-2 h-4 w-4" />
           {isPending ? 'Signing out…' : 'Sign out'}
         </DropdownMenuItem>
