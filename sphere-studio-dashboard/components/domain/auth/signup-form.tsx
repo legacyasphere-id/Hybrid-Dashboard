@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import Link from 'next/link'
@@ -9,10 +10,11 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
 import { GoogleOAuthButton } from '@/components/domain/auth/google-oauth-button'
-import { signup } from '@/lib/auth/actions'
+import { createClient } from '@/lib/supabase/client'
 import { signupSchema, type SignupInput } from '@/lib/validators/auth'
 
 export function SignupForm() {
+  const router = useRouter()
   const [serverError, setServerError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
 
@@ -27,8 +29,18 @@ export function SignupForm() {
   function onSubmit(data: SignupInput) {
     setServerError(null)
     startTransition(async () => {
-      const result = await signup(data)
-      if (result?.error) setServerError(result.error)
+      const supabase = createClient()
+      const { error } = await supabase.auth.signUp({
+        email: data.email,
+        password: data.password,
+        options: { data: { full_name: data.fullName } },
+      })
+      if (error) {
+        setServerError(error.message)
+        return
+      }
+      router.push('/dashboard')
+      router.refresh()
     })
   }
 
