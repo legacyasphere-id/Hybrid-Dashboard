@@ -1,15 +1,17 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { createWorkspace } from '@/lib/auth/workspace-actions'
+import { createClient } from '@/lib/supabase/client'
 import { workspaceSchema, type WorkspaceInput } from '@/lib/validators/auth'
 
 export function CreateWorkspaceForm() {
+  const router = useRouter()
   const [serverError, setServerError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
 
@@ -33,8 +35,21 @@ export function CreateWorkspaceForm() {
   function onSubmit(data: WorkspaceInput) {
     setServerError(null)
     startTransition(async () => {
-      const result = await createWorkspace(data)
-      if (result?.error) setServerError(result.error)
+      const supabase = createClient()
+      const slug = slugPreview || data.name.toLowerCase().replace(/\s+/g, '-')
+
+      const { error } = await supabase.rpc('create_workspace_for_user', {
+        p_name: data.name,
+        p_slug: slug,
+      })
+
+      if (error) {
+        setServerError(error.message)
+        return
+      }
+
+      router.push('/dashboard')
+      router.refresh()
     })
   }
 
