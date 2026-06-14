@@ -6,6 +6,19 @@ Manage clients, projects, and tasks in one place — built for designers and web
 
 ---
 
+## Current Status
+
+| Area | Status |
+|------|--------|
+| Auth (email/password + Google OAuth) | ✅ Working |
+| Workspace creation + RBAC | ✅ Working |
+| App shell (sidebar, topbar, nav) | ✅ Design tokens applied |
+| Clients CRUD | 🔲 In progress |
+| Projects CRUD | 🔲 In progress |
+| Tasks CRUD | 🔲 In progress |
+
+---
+
 ## Tech Stack
 
 | Layer | Choice |
@@ -92,13 +105,42 @@ npm run type-check   # TypeScript check (no emit)
 
 ---
 
+## Design System
+
+**Dark sidebar (`#111111`, 240px) + white topbar** — original Hybrid Dashboard tokens:
+
+```css
+--hs-accent: ...          /* brand accent */
+--hs-sidebar-bg: #111111  /* dark sidebar */
+--hs-neutral-*: ...       /* neutral scale */
+--hs-radius-*: ...        /* border radius scale */
+--hs-shadow-*: ...        /* shadow scale */
+```
+
+shadcn HSL tokens are remapped to the above so all shadcn components still render correctly.
+
+Sidebar features: dark nav items with hover states, Settings link, AI assistant card, gradient workspace switcher, dark user menu with avatar initials.
+
+---
+
 ## MVP Features
 
 - **Auth** — Email/password + Google OAuth, workspace-scoped sessions
-- **Workspaces** — Multi-workspace support with RBAC (owner / admin / member)
+- **Workspaces** — Multi-workspace support with RBAC (owner / admin / member), `create_workspace_for_user` SECURITY DEFINER RPC
 - **Clients** — CRUD client management
 - **Projects** — CRUD with status machine (planning → complete)
 - **Tasks** — CRUD with assignment and cross-project view
+
+---
+
+## Changelog
+
+| Date | What changed |
+|------|--------------|
+| Jun 11, 2026 | **Design tokens applied**: dark `#111111` sidebar, white topbar, breadcrumb, search kbd trigger, bell+dot, avatar initials, workspace switcher, user menu |
+| Jun 11, 2026 | **Auth fix**: moved login/signup to browser Supabase client — Server Actions weren't reliably flushing cookies before redirect, causing `auth.uid() = NULL` on API calls |
+| Jun 11, 2026 | **Workspace creation fix**: switched to `create_workspace_for_user` RPC (SECURITY DEFINER) — server-side RLS was rejecting the `workspaces` INSERT due to missing session JWT |
+| Jun 10, 2026 | **Redirect loop fix**: moved `workspace/new` outside `(app)` route group; added `force-dynamic` to app layout |
 
 ---
 
